@@ -37,15 +37,12 @@ INTEGER FUNCTION NODOFEL(NELEM, IELEM, IDXNODE)
 END FUNCTION
 
 
-!BIJ is the integral of G(XI,XJ) from XJM to XJP, nodes of the J element
-!CIJ is the integral of dG/dn(XI,XJ) from XJM to XJP, nodes of the J element
-SUBROUTINE BCIJ(XI, XJM, XJP, BIJ, CIJ)
+!Local frame of reference
+SUBROUTINE LOCFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
       IMPLICIT NONE
       REAL, DIMENSION(2), INTENT(IN) :: XI, XJM, XJP
-      REAL, INTENT(OUT) :: BIJ, CIJ
+      REAL, INTENT(OUT) :: XM, XP, YS, RM, RP
       REAL, DIMENSION(2) :: EX, VXP, VXM
-      REAL :: XM, XP, YS, RM, RP
-      REAL, PARAMETER :: PI = 4.*ATAN(1.)
       EX = XJP - XJM
       EX = EX/SQRT(EX(1)**2 + EX(2)**2)
 !     Vector X_+
@@ -57,6 +54,18 @@ SUBROUTINE BCIJ(XI, XJM, XJP, BIJ, CIJ)
       YS = -VXP(1)*EX(2) + VXP(2)*EX(1)
       RP = SQRT(XP**2 + YS**2)
       RM = SQRT(XM**2 + YS**2)
+END SUBROUTINE
+
+
+!BIJ is the integral of G(XI,XJ) from XJM to XJP, nodes of the J element
+!CIJ is the integral of dG/dn(XI,XJ) from XJM to XJP, nodes of the J element
+SUBROUTINE BCIJ(XI, XJM, XJP, BIJ, CIJ)
+      IMPLICIT NONE
+      REAL, DIMENSION(2), INTENT(IN) :: XI, XJM, XJP
+      REAL, INTENT(OUT) :: BIJ, CIJ
+      REAL :: XM, XP, YS, RM, RP
+      REAL, PARAMETER :: PI = 4.*ATAN(1.)
+      CALL LOCFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
       BIJ = (XP*LOG(RP) - XP + YS*ATAN2(XP,YS) - XM*LOG(RM) + XM - YS*ATAN2(XM,YS))/(2.*PI)
       CIJ = (ATAN2(XP,YS) - ATAN2(XM,YS))/(2.*PI)      
 END SUBROUTINE
