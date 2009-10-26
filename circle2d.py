@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from bem2d import circlegeom, srfmatbc, bcondvel, solvephi, circlefld, \
-                  calcfield, fldmatbc
+                  calcfield, fldmatbc, fldmatbcv, calcfieldv
 from numpy import array, zeros, savetxt, eye
 #from enthought.tvtk.api import tvtk
 
@@ -16,10 +16,9 @@ chisrf = bcondvel(xnode, u)
 phisrf = solvephi(B,C,chisrf,nelem)
 A = 0.5*eye(nelem)-C
 xfield = circlefld(radius, nhx, radius*4., nhy, radius*3.)
-Bf, Cf = fldmatbc(xfield, xnode)
-fldphi = calcfield(phisrf, chisrf, Bf, Cf)
+Bx, By, Cx, Cy = fldmatbcv(xfield, xnode)
+fldvel = calcfieldv(phisrf, chisrf, Bx, By, Cx, Cy)
 
-print phisrf
 
 """
 xyz = zeros((fldphi.size,3))

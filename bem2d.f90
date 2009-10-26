@@ -15,7 +15,7 @@ SUBROUTINE CIRCLEGEOM(NELEM, XNODE, R)
        THETA = DTH*REAL(I-1)
        XNODE(I,1) = R*COS(THETA)
        XNODE(I,2) = R*SIN(THETA)
-       XNODE(I,3) = THETA
+       XNODE(I,3) = THETA+DTH*0.5
       END DO
 END SUBROUTINE
 
@@ -67,7 +67,22 @@ SUBROUTINE BCIJ(XI, XJM, XJP, BIJ, CIJ)
       REAL, PARAMETER :: PI = 4.*ATAN(1.)
       CALL LOCFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
       BIJ = (XP*LOG(RP) - XP + YS*ATAN2(XP,YS) - XM*LOG(RM) + XM - YS*ATAN2(XM,YS))/(2.*PI)
-      CIJ = (ATAN2(XP,YS) - ATAN2(XM,YS))/(2.*PI)      
+      CIJ = (ATAN2(XP,YS) - ATAN2(XM,YS))/(2.*PI)
+END SUBROUTINE
+
+
+SUBROUTINE BCIJV(XI, XJM, XJP, TH, BIJX, BIJY, CIJX, CIJY)
+      IMPLICIT NONE
+      REAL, DIMENSION(2), INTENT(IN) :: XI, XJM, XJP
+      REAL, INTENT(IN) :: TH
+      REAL, INTENT(OUT) :: BIJX, BIJY, CIJX, CIJY
+      REAL :: XM, XP, YS, RM, RP
+      REAL, PARAMETER :: PI = 4.*ATAN(1.)
+      CALL LOCFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
+      BIJX = (ATAN2(YS,XM)*COS(TH) + LOG(RM)*SIN(TH) - ATAN2(YS,XP)*COS(TH) - LOG(RP)*SIN(TH))/(2.*PI)
+      BIJY = (ATAN2(YS,XM)*SIN(TH) - LOG(RM)*COS(TH) - ATAN2(YS,XP)*SIN(TH) + LOG(RP)*COS(TH))/(2.*PI)
+      CIJX = ((XM*COS(TH)+YS*SIN(TH))/(RM**2) - (XP*COS(TH)+YS*SIN(TH))/(RP**2))/(2.*PI)
+      CIJY = ((XM*SIN(TH)-YS*COS(TH))/(RM**2) - (XP*SIN(TH)-YS*COS(TH))/(RP**2))/(2.*PI)
 END SUBROUTINE
 
 
@@ -161,6 +176,45 @@ SUBROUTINE FLDMATBC(NX, X, N, XNODE, B, C)
 END SUBROUTINE
 
 
+!Calculate B and C matrices on the field points X for velocity calculation
+SUBROUTINE FLDMATBCV(NX, X, N, XNODE, BX, BY, CX, CY)
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: NX, N
+      REAL, DIMENSION(NX,2), INTENT(IN) :: X
+      REAL, DIMENSION(N,3), INTENT(IN) :: XNODE
+      REAL, DIMENSION(NX,N), INTENT(OUT) :: BX, BY, CX, CY
+      REAL, DIMENSION(2) :: XI
+      REAL :: BIJX, BIJY, CIJX, CIJY
+      INTEGER :: I, J, NODOFEL
+      DO I = 1, NX
+       XI = X(I,:)
+       DO J = 1, N
+        CALL BCIJV(XI, XNODE(NODOFEL(N,J,1),:), XNODE(NODOFEL(N,J,2),:), XNODE(J,3), BIJX, BIJY, CIJX, CIJY)
+        BX(I,J) = BIJX
+        BY(I,J) = BIJY
+        CX(I,J) = CIJX
+        CY(I,J) = CIJY
+       END DO
+      END DO
+END SUBROUTINE
+
+
+!Calculate the velocity in the field
+!  PHISRF   On surface                          (in)
+!  CHISRF   On surface                          (in)
+!  B, C     In the field                        (in)
+!  PHIFLD   In the field                        (out)
+SUBROUTINE CALCFIELDV(N, PHISRF, CHISRF, NX, BX, BY, CX, CY, VELFLD)
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: N, NX
+      REAL, DIMENSION(N), INTENT(IN) :: PHISRF, CHISRF
+      REAL, DIMENSION(NX,N) :: BX, BY, CX, CY
+      REAL, DIMENSION(NX,2), INTENT(OUT) :: VELFLD
+      VELFLD(:,1) = MATMUL(BX, CHISRF) - MATMUL(CX, PHISRF)
+      VELFLD(:,2) = MATMUL(BY, CHISRF) - MATMUL(CY, PHISRF)
+END SUBROUTINE
+
+
 !Calculate the potential in the field
 !  PHISRF   On surface                          (in)
 !  CHISRF   On surface                          (in)
@@ -172,7 +226,7 @@ SUBROUTINE CALCFIELD(N, PHISRF, CHISRF, NX, B, C, PHIFLD)
       REAL, DIMENSION(N), INTENT(IN) :: PHISRF, CHISRF
       REAL, DIMENSION(NX,N) :: B, C
       REAL, DIMENSION(NX), INTENT(OUT) :: PHIFLD
-      PHIFLD = MATMUL(C, PHISRF) + MATMUL(B, CHISRF)
+      PHIFLD = MATMUL(B, CHISRF) - MATMUL(C, PHISRF)
 END SUBROUTINE
 
 
