@@ -1,0 +1,1 @@
+f2py -c -llapack -m bem2d bem2d.f90

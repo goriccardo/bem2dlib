@@ -46,12 +46,14 @@ SUBROUTINE LOCFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
       EX = XJP - XJM
       EX = EX/SQRT(EX(1)**2 + EX(2)**2)
 !     Vector X_+
-      VXP = (XI - XJP)
+      VXP = (XJP - XI)
 !     Vector X_-
-      VXM = (XI - XJM)
-      XP = -VXP(1)*EX(1) - VXP(2)*EX(2)
-      XM = -VXM(1)*EX(1) - VXM(2)*EX(2)
-      YS = -VXP(1)*EX(2) + VXP(2)*EX(1)
+      VXM = (XJM - XI)
+!     XP is always greater than XM
+      XP = VXP(1)*EX(1) + VXP(2)*EX(2)
+      XM = VXM(1)*EX(1) + VXM(2)*EX(2)
+!     YS is positive on the inside and negative on the outside
+      YS = VXP(1)*EX(2) - VXP(2)*EX(1)
       RP = SQRT(XP**2 + YS**2)
       RM = SQRT(XM**2 + YS**2)
 END SUBROUTINE
@@ -132,7 +134,7 @@ SUBROUTINE BCONDVEL(N, XNODE, U, CHI)
 END SUBROUTINE
 
 
-!Solve the (NxN) linear system (0.5*I-B)*phi = C*chi
+!Solve the (NxN) linear system (0.5*I - C)*phi = C*chi
 SUBROUTINE SOLVEPHI(N, B, C, PHI, CHI)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: N
