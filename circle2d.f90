@@ -5,7 +5,7 @@ PROGRAM circle2d
 !      Vector of nodes global coordinates (x,y)
        REAL, DIMENSION(NELEM,2) :: XNODE
 !      Circle radius
-       REAL, PARAMETER :: R = 2.
+       REAL, PARAMETER :: R = 1.
        REAL, DIMENSION(2) :: U = (/-1.,0./)
 !      Potential and normal wash on the surface
        REAL, DIMENSION(NELEM) :: phi, chi
