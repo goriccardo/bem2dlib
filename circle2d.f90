@@ -1,3 +1,6 @@
+!Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
+!Released under BSD license, see LICENSE
+
 !A circle in a _potential_ flow
 PROGRAM circle2d
        IMPLICIT NONE

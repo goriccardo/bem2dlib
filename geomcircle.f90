@@ -1,3 +1,6 @@
+!Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
+!Released under BSD license, see LICENSE
+
 !Calculate the position of the nodes
 !  NELEM    Figure of elements       (IN)
 !  XNODE    Nodes and angles vector  (OUT)

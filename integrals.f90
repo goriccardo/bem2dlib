@@ -1,3 +1,6 @@
+!Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
+!Released under BSD license, see LICENSE
+
 !BIJ is the integral of G(XI,XJ) from XJM to XJP, nodes of the J element
 !CIJ is the integral of dG/dn(XI,XJ) from XJM to XJP, nodes of the J element
 SUBROUTINE BCIJ(XI, XJM, XJP, BIJ, CIJ)

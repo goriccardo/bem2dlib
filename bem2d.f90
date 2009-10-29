@@ -1,3 +1,6 @@
+!Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
+!Released under BSD license, see LICENSE
+
 !Local frame of reference
 SUBROUTINE LOCFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
       IMPLICIT NONE
