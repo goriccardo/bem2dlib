@@ -1,27 +1,6 @@
 !Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
 !Released under BSD license, see LICENSE
 
-!Local frame of reference
-SUBROUTINE LOCFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
-      IMPLICIT NONE
-      REAL, DIMENSION(2), INTENT(IN) :: XI, XJM, XJP
-      REAL, INTENT(OUT) :: XM, XP, YS, RM, RP
-      REAL, DIMENSION(2) :: EX, VXP, VXM
-      EX = XJP - XJM
-      EX = EX/SQRT(EX(1)**2 + EX(2)**2)
-!     Vector X_+
-      VXP = (XJP - XI)
-!     Vector X_-
-      VXM = (XJM - XI)
-!     XP is always greater than XM
-      XP = VXP(1)*EX(1) + VXP(2)*EX(2)
-      XM = VXM(1)*EX(1) + VXM(2)*EX(2)
-!     YS is positive on the inside and negative on the outside
-      YS = VXP(1)*EX(2) - VXP(2)*EX(1)
-      RP = SQRT(XP**2 + YS**2)
-      RM = SQRT(XM**2 + YS**2)
-END SUBROUTINE
-
 
 !Gives the inode for the ielem
 !  IDXNODE must be 1 or 2 (first or second node of the element)
@@ -68,7 +47,7 @@ SUBROUTINE SOLVEPHI(N, B, C, PHI, CHI)
       INTEGER :: I, INFO
       REAL, DIMENSION(N,N) :: A
       REAL, DIMENSION(N) :: RHS, IPIV
-      A = C
+      A = -C
       DO I = 1, N
        A(I,I) = A(I,I) + 0.5
       END DO
@@ -92,8 +71,8 @@ SUBROUTINE CALCFIELDV(N, PHISRF, CHISRF, NX, BX, BY, CX, CY, VELFLD)
       REAL, DIMENSION(N), INTENT(IN) :: PHISRF, CHISRF
       REAL, DIMENSION(NX,N) :: BX, BY, CX, CY
       REAL, DIMENSION(NX,2), INTENT(OUT) :: VELFLD
-      VELFLD(:,1) = MATMUL(BX, CHISRF) - MATMUL(CX, PHISRF)
-      VELFLD(:,2) = MATMUL(BY, CHISRF) - MATMUL(CY, PHISRF)
+      VELFLD(:,1) = MATMUL(BX, CHISRF) + MATMUL(CX, PHISRF)
+      VELFLD(:,2) = MATMUL(BY, CHISRF) + MATMUL(CY, PHISRF)
 END SUBROUTINE
 
 
@@ -102,11 +81,11 @@ END SUBROUTINE
 !  CHISRF   On surface                          (in)
 !  B, C     In the field                        (in)
 !  PHIFLD   In the field                        (out)
-SUBROUTINE CALCFIELD(N, PHISRF, CHISRF, NX, B, C, PHIFLD)
+SUBROUTINE CALCPHIFLD(N, PHISRF, CHISRF, NX, B, C, PHIFLD)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: N, NX
       REAL, DIMENSION(N), INTENT(IN) :: PHISRF, CHISRF
       REAL, DIMENSION(NX,N) :: B, C
       REAL, DIMENSION(NX), INTENT(OUT) :: PHIFLD
-      PHIFLD = MATMUL(B, CHISRF) - MATMUL(C, PHISRF)
+      PHIFLD = MATMUL(B, CHISRF) + MATMUL(C, PHISRF)
 END SUBROUTINE

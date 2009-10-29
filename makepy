@@ -1,1 +1,1 @@
-f2py -c -llapack -m bem2d bem2d.f90
+f2py -c -llapack -m bempy2d bem2d.f90 integrals.f90 geomcircle.f90 fieldgrid.f90

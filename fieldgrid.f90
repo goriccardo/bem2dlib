@@ -12,7 +12,7 @@ subroutine fieldgrid(xmin, xmax, nx, ymin, ymax, ny, xyvec)
   dx = (xmax-xmin)/real(nx-1)
   dy = (ymax-ymin)/real(ny-1)
   do i = 1,nx
-    xyvec((i-1)*ny:(i)*ny,1) = xmin + dx*(i-1)
+    xyvec((i-1)*ny+1:(i)*ny,1) = xmin + dx*(i-1)
     do j = 1,ny
       xyvec((i-1)*ny+j,2) = ymin + dy*(j-1)
     end do
