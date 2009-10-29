@@ -65,7 +65,7 @@ END SUBROUTINE
 !  CHISRF   On surface                          (in)
 !  B, C     In the field                        (in)
 !  PHIFLD   In the field                        (out)
-SUBROUTINE CALCFIELDV(N, PHISRF, CHISRF, NX, BX, BY, CX, CY, VELFLD)
+SUBROUTINE CALCVELFLD(N, PHISRF, CHISRF, NX, BX, BY, CX, CY, VELFLD)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: N, NX
       REAL, DIMENSION(N), INTENT(IN) :: PHISRF, CHISRF

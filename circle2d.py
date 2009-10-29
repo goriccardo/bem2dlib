@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 
 def main():
-
   from bempy2d import circlegeom, srfmatbc, bcondvel, solvephi, circlefld, \
-                      calcphifld, fldmatbc, fldmatbcv, calcfieldv, fieldgrid
+                      calcphifld, fldmatbc, fldmatbcv, calcvelfld, fieldgrid
   from numpy import array, zeros, savetxt, eye, linspace
 
   nelem = 100
   radius = 1.
   u = array([-1.,0.])
-  xmin, xmax = -4,4
-  ymin, ymax = -3,3
-  nx, ny = 500, 500
+  xmin, xmax = -4.,  4.
+  ymin, ymax = -3., -1.
+  nx, ny = 20, 20
   xnode = circlegeom(nelem,radius)
   B, C = srfmatbc(xnode)
   chisrf = bcondvel(xnode, u)
@@ -21,11 +20,15 @@ def main():
   Bf, Cf = fldmatbc(xfield, xnode)
   phifld = calcphifld(phisrf,chisrf,Bf,Cf)
 
+  Bxf, Byf, Cxf, Cyf = fldmatbcv(xfield,xnode)
+  velfld = calcvelfld(phisrf,chisrf,Bxf,Byf,Cxf,Cyf)
+
   xcont = linspace(xmin,xmax,nx)
   ycont = linspace(ymin,ymax,ny)
   Z = phifld.reshape((nx,ny)).T
 
   plotphicont(xcont,ycont,Z)
+#  plotvelfld(xfield,velfld)
 
 
 def plotphicont(X,Y,Z):
@@ -36,6 +39,13 @@ def plotphicont(X,Y,Z):
   spl.set_aspect('equal','box')
   title(r'Field potential $\varphi$')
   show()
+
+
+def plotvelfld(XY,VF):
+  from pylab import quiver, show
+  quiver(XY[:,0],XY[:,1],VF[:,0],VF[:,1])
+  show()
+
 
 if( __name__ == '__main__'):
   main()
