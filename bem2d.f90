@@ -60,22 +60,6 @@ SUBROUTINE SOLVEPHI(N, B, C, PHI, CHI)
 END SUBROUTINE
 
 
-!Calculate the velocity in the field
-!  PHISRF   On surface                          (in)
-!  CHISRF   On surface                          (in)
-!  B, C     In the field                        (in)
-!  PHIFLD   In the field                        (out)
-SUBROUTINE CALCVELFLD(N, PHISRF, CHISRF, NX, BX, BY, CX, CY, VELFLD)
-      IMPLICIT NONE
-      INTEGER, INTENT(IN) :: N, NX
-      REAL, DIMENSION(N), INTENT(IN) :: PHISRF, CHISRF
-      REAL, DIMENSION(NX,N) :: BX, BY, CX, CY
-      REAL, DIMENSION(NX,2), INTENT(OUT) :: VELFLD
-      VELFLD(:,1) = MATMUL(BX, CHISRF) + MATMUL(CX, PHISRF)
-      VELFLD(:,2) = MATMUL(BY, CHISRF) + MATMUL(CY, PHISRF)
-END SUBROUTINE
-
-
 !Calculate the potential in the field
 !  PHISRF   On surface                          (in)
 !  CHISRF   On surface                          (in)
@@ -89,3 +73,4 @@ SUBROUTINE CALCPHIFLD(N, PHISRF, CHISRF, NX, B, C, PHIFLD)
       REAL, DIMENSION(NX), INTENT(OUT) :: PHIFLD
       PHIFLD = MATMUL(B, CHISRF) + MATMUL(C, PHISRF)
 END SUBROUTINE
+
