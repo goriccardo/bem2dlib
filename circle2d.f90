@@ -6,21 +6,21 @@ PROGRAM circle2d
        IMPLICIT NONE
        INTEGER, PARAMETER :: NELEM = 50
 !      Vector of nodes global coordinates (x,y)
-       REAL, DIMENSION(NELEM,2) :: XNODE
+       REAL(KIND=8), DIMENSION(NELEM,2) :: XNODE
 !      Circle radius
-       REAL, PARAMETER :: R = 1.
-       REAL, DIMENSION(2) :: U = (/-1.,0./)
+       REAL(KIND=8), PARAMETER :: R = 1.
+       REAL(KIND=8), DIMENSION(2) :: U = (/-1.,0./)
 !      Potential and normal wash on the surface
-       REAL, DIMENSION(NELEM) :: phi, chi
-       REAL, DIMENSION(NELEM,NELEM) :: B, C
+       REAL(KIND=8), DIMENSION(NELEM) :: phi, chi
+       REAL(KIND=8), DIMENSION(NELEM,NELEM) :: B, C
 !      Field grid size limits and vector
        INTEGER, PARAMETER :: NX = 100, NY = 100
-       REAL, PARAMETER :: XMIN = -4., XMAX = 4., YMIN = -3., YMAX = 3.
-       REAL, DIMENSION(NY*NY,2) :: XFIELD
+       REAL(KIND=8), PARAMETER :: XMIN = -4., XMAX = 4., YMIN = -3., YMAX = 3.
+       REAL(KIND=8), DIMENSION(NY*NY,2) :: XFIELD
 !      Field matrices Bf and Cf
-       REAL, DIMENSION(NX*NY,NELEM) :: BF, CF
+       REAL(KIND=8), DIMENSION(NX*NY,NELEM) :: BF, CF
 !      Field potential vector
-       REAL, DIMENSION(NX*NY) :: PHIF
+       REAL(KIND=8), DIMENSION(NX*NY) :: PHIF
        INTEGER :: NFIELD
        NFIELD = NX*NY
 !      The program starts here!
@@ -38,7 +38,7 @@ END PROGRAM
 !Save the phi on the surface
 SUBROUTINE SAVEPHI(N, PHI, FNAME)
       INTEGER, INTENT(IN) :: N
-      REAL, DIMENSION(N), INTENT(IN) :: PHI
+      REAL(KIND=8), DIMENSION(N), INTENT(IN) :: PHI
       CHARACTER :: FNAME*128
       OPEN(UNIT=11, FILE=FNAME)
       WRITE(11,1) PHI

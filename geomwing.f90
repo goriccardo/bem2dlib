@@ -8,12 +8,12 @@
 SUBROUTINE GEOMWING(NELEM, XNODE, C)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: NELEM
-      REAL, INTENT(IN) :: C
-      REAL, DIMENSION(NELEM,3), INTENT(OUT) :: XNODE
-      REAL, PARAMETER :: PI = 4.*ATAN(1.)
+      REAL(KIND=8), INTENT(IN) :: C
+      REAL(KIND=8), DIMENSION(NELEM,3), INTENT(OUT) :: XNODE
+      REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
       INTEGER :: I
-      REAL :: DX !, THETA
-      DX = 1./REAL(NELEM)
+      REAL(KIND=8) :: DX !, THETA
+      DX = 1./REAL(NELEM,8)
       XNODE(1,1) = 0.
       XNODE(1,2) = 0.
       XNODE(NELEM/2+1,1) = C
@@ -35,23 +35,23 @@ END SUBROUTINE
 !  DELTAY   Size on Y
 SUBROUTINE CIRCLEFLD(R, NHX, DELTAX, NHY, DELTAY, XFIELD)
       IMPLICIT NONE
-      REAL, INTENT(IN) :: R, DELTAX, DELTAY
+      REAL(KIND=8), INTENT(IN) :: R, DELTAX, DELTAY
       INTEGER, INTENT(IN) :: NHX, NHY
-      REAL, DIMENSION(NHX*NHY*4,2), INTENT(OUT) :: XFIELD
-      REAL, PARAMETER :: PI = 4.*ATAN(1.)
-      REAL :: X, Y, DX, DY
+      REAL(KIND=8), DIMENSION(NHX*NHY*4,2), INTENT(OUT) :: XFIELD
+      REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
+      REAL(KIND=8) :: X, Y, DX, DY
       INTEGER :: IY, IX, NX, NY
       NX = NHX*2
       NY = NHY*2
       X = -DELTAX/2.
-      DX = DELTAX/REAL(NX-1)
+      DX = DELTAX/REAL(NX-1,8)
       DO IY = 1, NHY
        X = -DELTAX/2.
        DO IX = 1, NHX
         IF (ABS(X) .GE. R) THEN
-          DY = (DELTAY)/REAL(NY-1)
+          DY = (DELTAY)/REAL(NY-1,8)
         ELSE
-          DY = (DELTAY - 2.*SIN(ACOS(ABS(X)/R)))/REAL(NY-1)
+          DY = (DELTAY - 2.*SIN(ACOS(ABS(X)/R)))/REAL(NY-1,8)
         END IF
         Y = -DELTAY/2. + (IY-1)*DY
 !       Bottom left

@@ -4,13 +4,13 @@
 !Create a vector representing a grid for field contour plotting
 subroutine fieldgrid(xmin, xmax, nx, ymin, ymax, ny, xyvec)
   integer, intent(in) :: nx, ny
-  real, intent(in) :: xmin, xmax, ymin, ymax
-  real, dimension(nx*ny,2), intent(out) :: xyvec
+  real(kind=8), intent(in) :: xmin, xmax, ymin, ymax
+  real(kind=8), dimension(nx*ny,2), intent(out) :: xyvec
   integer :: i,j
-  real :: dx, dy
+  real(kind=8) :: dx, dy
 
-  dx = (xmax-xmin)/real(nx-1)
-  dy = (ymax-ymin)/real(ny-1)
+  dx = (xmax-xmin)/real(nx-1,8)
+  dy = (ymax-ymin)/real(ny-1,8)
   do i = 1,nx
     xyvec((i-1)*ny+1:(i)*ny,1) = xmin + dx*(i-1)
     do j = 1,ny
