@@ -6,7 +6,7 @@ PROGRAM circle2d
        IMPLICIT NONE
        INTEGER, PARAMETER :: NELEM = 100
 !      Vector of nodes global coordinates (x,y)
-       REAL(KIND=8), DIMENSION(NELEM,3) :: XNODE
+       REAL(KIND=8), DIMENSION(NELEM,2) :: XNODE
 !      Circle radius
        REAL(KIND=8), PARAMETER :: R = 1.
        REAL(KIND=8), DIMENSION(2) :: U = (/-1.,0./)

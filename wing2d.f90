@@ -6,7 +6,7 @@ PROGRAM wing2d
        IMPLICIT NONE
        INTEGER, PARAMETER :: NELEM = 50
 !      Vector of nodes global coordinates (x,y)
-       REAL(KIND=8), DIMENSION(NELEM,3) :: XNODE
+       REAL(KIND=8), DIMENSION(NELEM,2) :: XNODE
 !      Circle radius
        REAL(KIND=8), PARAMETER :: CHORD = 1.
        REAL(KIND=8), DIMENSION(2) :: U = (/-1.,0./)
@@ -31,7 +31,7 @@ PROGRAM wing2d
        INTEGER :: NFIELD
        NFIELD = NX*NY
 !      The program starts here!
-       CALL GEOMWING1(NELEM, XNODE, CHORD, T)
+       CALL GEOMWING(NELEM, XNODE, CHORD, T)
        CALL SRFMATBC(NELEM, XNODE, B, C)
        CALL BCONDVEL(NELEM, XNODE, U, CHI)
        CALL SOLVEPHI(NELEM, B, C, PHI, CHI)
