@@ -1,68 +1,55 @@
 !Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
+!                   Jelle Reichert <jellereichert@gmail.com>
 !Released under BSD license, see LICENSE
 
 !Calculate the position of the nodes
+!The formula is y = sqrt(x)*(1-x)
 !  NELEM    Figure of elements       (IN)
 !  XNODE    Nodes and angles vector  (OUT)
-!  R        Radius                   (IN)
-SUBROUTINE GEOMWING(NELEM, XNODE, C)
+!  T        Thickness                (IN)
+!  C        Chord                    (IN)
+!It use an iterative method to make the elements of the same lenght
+SUBROUTINE GEOMWING(NELEM, XNODE, C, T)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: NELEM
-      REAL(KIND=8), INTENT(IN) :: C
+      REAL(KIND=8), INTENT(IN) :: T, C
       REAL(KIND=8), DIMENSION(NELEM,3), INTENT(OUT) :: XNODE
+      REAL(KIND=8), DIMENSION(NELEM/2) :: DS, DX, PHI
       REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
-      INTEGER :: I
-      REAL(KIND=8) :: DX !, THETA
-      DX = 1./REAL(NELEM,8)
-      XNODE(1,1) = 0.
+      INTEGER :: I, J, NITER = 15
+      REAL(KIND=8) :: X, Y, SSQ, SIGMA, MEAN !, THETA
+      !First and mid nodes
+      XNODE(1,1) = C
       XNODE(1,2) = 0.
-      XNODE(NELEM/2+1,1) = C
+      XNODE(NELEM/2+1,1) = 0.
       XNODE(NELEM/2+1,2) = 0.
-      DO I = 1,NELEM/2
-       XNODE(I+1,1) = DX*I
-       XNODE(I+1,2) = SQRT(DX*I)*(1-DX*I)
-       XNODE(NELEM-I+1,1) = DX*I
-       XNODE(NELEM-I+1,2) = -XNODE(I+1,2)
-       !XNODE(I,3) = ATAN2(XNODE(I,2),XNODE(I,1))+PI/2.
-      END DO
-END SUBROUTINE
-
-
-!  R        Circle radius
-!  NHX      Half of points on X figure
-!  DELTAX   Size on X
-!  NHY      Half of points on Y figure
-!  DELTAY   Size on Y
-SUBROUTINE CIRCLEFLD(R, NHX, DELTAX, NHY, DELTAY, XFIELD)
-      IMPLICIT NONE
-      REAL(KIND=8), INTENT(IN) :: R, DELTAX, DELTAY
-      INTEGER, INTENT(IN) :: NHX, NHY
-      REAL(KIND=8), DIMENSION(NHX*NHY*4,2), INTENT(OUT) :: XFIELD
-      REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
-      REAL(KIND=8) :: X, Y, DX, DY
-      INTEGER :: IY, IX, NX, NY
-      NX = NHX*2
-      NY = NHY*2
-      X = -DELTAX/2.
-      DX = DELTAX/REAL(NX-1,8)
-      DO IY = 1, NHY
-       X = -DELTAX/2.
-       DO IX = 1, NHX
-        IF (ABS(X) .GE. R) THEN
-          DY = (DELTAY)/REAL(NY-1,8)
-        ELSE
-          DY = (DELTAY - 2.*SIN(ACOS(ABS(X)/R)))/REAL(NY-1,8)
+      !Symmetric profile
+      DX(:) = C/REAL(NELEM/2,8)
+      DO I = 1,NITER
+       DO J = 1,NELEM/2
+        IF (J .LT. NELEM/2) THEN
+         X = C-SUM(DX(:J))
+         XNODE(J+1,1) = X
+         Y = T / SQRT(16./27.) * DSQRT(X/C)*(1.-X/C)
+         XNODE(J+1,2) = Y
+         XNODE(NELEM-J+1,1) = X
+         XNODE(NELEM-J+1,2) = -Y
         END IF
-        Y = -DELTAY/2. + (IY-1)*DY
-!       Bottom left
-        XFIELD((IY-1)*NX + IX,:) = (/X, Y/)
-!       Bottom right
-        XFIELD((IY)*NX - IX + 1,:) = (/-X, Y/)
-!       Top left
-        XFIELD(NHX*NHY*4 - (IY)*NX + IX,:) = (/X, -Y/)
-!       Top right
-        XFIELD(NHX*NHY*4 - (IY-1)*NX - IX + 1,:) = (/-X, -Y/)
-        X = X + DX
+        DS(J) = DSQRT( (XNODE(J+1,1)- XNODE(J,1))**2 + (XNODE(J+1,2)-XNODE(J,2))**2 )
+        PHI(J) = DATAN2( XNODE(J,2) - XNODE(J+1,2) , XNODE(J,1) - XNODE(J+1,1) )
        END DO
+       !Mean and stdev
+       MEAN = SUM(DS)/DFLOAT(NELEM/2)
+       SSQ = 0.
+       DO J = 1,NELEM/2
+        SSQ = SSQ + (DS(J)-MEAN)**2
+       END DO
+       SIGMA = DSQRT( 1./DFLOAT(NELEM/2-1) * SSQ )
+       !Iteration
+       DO J = 1,NELEM/2-1
+        DX(J) = MEAN*DCOS(PHI(J))
+       END DO
+       DX(NELEM/2) = C - SUM(DX(:NELEM/2-1))
       END DO
 END SUBROUTINE
+

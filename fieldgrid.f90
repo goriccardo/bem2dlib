@@ -8,13 +8,13 @@ subroutine fieldgrid(xmin, xmax, nx, ymin, ymax, ny, xyvec)
   real(kind=8), dimension(nx*ny,2), intent(out) :: xyvec
   integer :: i,j
   real(kind=8) :: dx, dy
-
   dx = (xmax-xmin)/real(nx-1,8)
   dy = (ymax-ymin)/real(ny-1,8)
-  do i = 1,nx
-    xyvec((i-1)*ny+1:(i)*ny,1) = xmin + dx*(i-1)
-    do j = 1,ny
-      xyvec((i-1)*ny+j,2) = ymin + dy*(j-1)
-    end do
+  do i = 1,ny
+   xyvec((i-1)*nx+1:i*nx,2) = ymin + dy*(i-1)
+   do j = 1,nx
+    xyvec((i-1)*nx+j,1) = xmin + dx*(j-1)
+   end do
   end do
 end subroutine
+

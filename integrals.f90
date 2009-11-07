@@ -19,7 +19,7 @@ SUBROUTINE LOCFR(XS, XJM, XJP, XM, XP, YS, RM, RP)
       REAL(KIND=8), INTENT(OUT) :: XM, XP, YS, RM, RP
       REAL(KIND=8), DIMENSION(2) :: EX, VXP, VXM
       EX = XJP - XJM
-      EX = EX/SQRT(EX(1)**2 + EX(2)**2)
+      EX = EX/DSQRT(EX(1)**2 + EX(2)**2)
 !     Vector X_+
       VXP = (XJP - XS)
 !     Vector X_-
@@ -29,8 +29,8 @@ SUBROUTINE LOCFR(XS, XJM, XJP, XM, XP, YS, RM, RP)
       XM = VXM(1)*EX(1) + VXM(2)*EX(2)
 !     YS is positive on the inside and negative on the outside
       YS = VXP(1)*EX(2) - VXP(2)*EX(1)
-      RP = SQRT(XP**2 + YS**2)
-      RM = SQRT(XM**2 + YS**2)
+      RP = DSQRT(XP**2 + YS**2)
+      RM = DSQRT(XM**2 + YS**2)
 END SUBROUTINE
 
 
@@ -41,10 +41,13 @@ SUBROUTINE BCIJ(XI, XJM, XJP, BIJ, CIJ)
       REAL(KIND=8), DIMENSION(2), INTENT(IN) :: XI, XJM, XJP
       REAL(KIND=8), INTENT(OUT) :: BIJ, CIJ
       REAL(KIND=8) :: XM, XP, YS, RM, RP
-      REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
+      REAL(KIND=8) :: AYS, S
+      REAL(KIND=8), PARAMETER :: PI = REAL(4.,8)*DATAN(REAL(1.,8))
       CALL LOCFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
-      BIJ = (XP*LOG(RP) - XP + YS*ATAN2(XP,ABS(YS)) - XM*LOG(RM) + XM - YS*ATAN2(XM,ABS(YS)))/(2.*PI)
-      CIJ = -(ATAN2(XP,ABS(YS)) - ATAN2(XM,ABS(YS)))/(2.*PI)
+      AYS = DABS(YS)
+      S = DSIGN(1.D0,YS)
+      BIJ = (XP*DLOG(RP) - XP - XM*DLOG(RM) + XM + YS*DATAN2(S*XP,AYS) - YS*DATAN2(S*XM,AYS))/(REAL(2.,8)*PI)
+      CIJ = -(DATAN2(S*XP,AYS) - DATAN2(S*XM,AYS))/(REAL(2.,8)*PI)
 END SUBROUTINE
 
 
@@ -133,3 +136,4 @@ SUBROUTINE FLDMATBCV(NX, X, N, XNODE, BX, BY, CX, CY)
        END DO
       END DO
 END SUBROUTINE
+
