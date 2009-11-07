@@ -2,43 +2,47 @@
 !Released under BSD license, see LICENSE
 
 !A circle in a _potential_ flow
-PROGRAM circle2d
+PROGRAM wing2d
        IMPLICIT NONE
        INTEGER, PARAMETER :: NELEM = 50
 !      Vector of nodes global coordinates (x,y)
-       REAL, DIMENSION(NELEM,3) :: XNODE
+       REAL(KIND=8), DIMENSION(NELEM,3) :: XNODE
 !      Circle radius
-       REAL, PARAMETER :: R = 1.
-       REAL, DIMENSION(2) :: U = (/-1.,0./)
+       REAL(KIND=8), PARAMETER :: CHORD = 1.
+       REAL(KIND=8), DIMENSION(2) :: U = (/-1.,0./)
+       REAL(KIND=8) :: T = 1.
 !      Potential and normal wash on the surface
-       REAL, DIMENSION(NELEM) :: phi, chi
-       REAL, DIMENSION(NELEM,NELEM) :: B, C
+       REAL(KIND=8), DIMENSION(NELEM) :: phi, chi
+       REAL(KIND=8), DIMENSION(NELEM,NELEM) :: B, C
+!      Time length of the acceleration and end-speed
+       REAL(KIND=8), PARAMETER :: TIME = 1.
+       REAL(KIND=8), PARAMETER :: VB = 5.
+       INTEGER :: TIMESTEP = 10.
+!      Pressure
+       REAL(KIND=8), DIMENSION(NELEM) :: PRES
 !      Field grid size limits and vector
        INTEGER, PARAMETER :: NX = 100, NY = 100
-       REAL, PARAMETER :: XMIN = -4., XMAX = 4., YMIN = -3., YMAX = 3.
-       REAL, DIMENSION(NY*NY,2) :: XFIELD
+       REAL(KIND=8), PARAMETER :: XMIN = -4., XMAX = 4., YMIN = -3., YMAX = 3.
+       REAL(KIND=8), DIMENSION(NY*NY,2) :: XFIELD
 !      Field matrices Bf and Cf
-       REAL, DIMENSION(NX*NY,NELEM) :: BF, CF
+       REAL(KIND=8), DIMENSION(NX*NY,NELEM) :: BF, CF
 !      Field potential vector
-       REAL, DIMENSION(NX*NY) :: PHIF
+       REAL(KIND=8), DIMENSION(NX*NY) :: PHIF
        INTEGER :: NFIELD
        NFIELD = NX*NY
 !      The program starts here!
-       CALL GEOMWING(NELEM, XNODE, C)
+       CALL GEOMWING1(NELEM, XNODE, CHORD, T)
        CALL SRFMATBC(NELEM, XNODE, B, C)
        CALL BCONDVEL(NELEM, XNODE, U, CHI)
        CALL SOLVEPHI(NELEM, B, C, PHI, CHI)
        CALL SAVEPHI(NELEM, PHI, "phisurf")
-       CALL FIELDGRID(XMIN, XMAX, NX, YMIN, YMAX, NY, XFIELD)
-       CALL FLDMATBC(NFIELD, XFIELD, NELEM, XNODE, BF, CF)
-       CALL CALCPHIFLD(NELEM, PHI, CHI, NFIELD, BF, CF, PHIF)
-       CALL SAVEPHI(NFIELD, PHIF, "phifield")
+       CALL CALCPRES(NELEM, XNODE, TIME, TIMESTEP, VB, PHI, CHI, PRES)
 END PROGRAM
 
 !Save the phi on the surface
 SUBROUTINE SAVEPHI(N, PHI, FNAME)
       INTEGER, INTENT(IN) :: N
-      REAL, DIMENSION(N), INTENT(IN) :: PHI
+      REAL(KIND=8), DIMENSION(N), INTENT(IN) :: PHI
       CHARACTER :: FNAME*128
       OPEN(UNIT=11, FILE=FNAME)
       WRITE(11,1) PHI

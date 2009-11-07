@@ -14,7 +14,7 @@ SUBROUTINE GEOMWING1(NELEM, XNODE, C, T)
       REAL(KIND=8), DIMENSION(NELEM) :: DIF
       REAL(KIND=8), DIMENSION(NELEM/2) :: DX,PHI
       REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
-      INTEGER :: J,I,NITER = 100
+      INTEGER :: J, I, NITER = 10
       REAL(KIND=8) :: DS, THETA, MEAN, SIGMA, X
       THETA = (PI)/((NELEM/2.)+1.)
 
@@ -28,13 +28,12 @@ SUBROUTINE GEOMWING1(NELEM, XNODE, C, T)
        DO J = 1,NELEM/2
         X = SUM(DX(:J))
         XNODE(J+1,1) = X
-        XNODE(J+1,2) = (T/(2.*SQRT(4./27.)))*SQRT(X/C)*(1-X/C)
+        XNODE(J+1,2) = -(T/(2.*SQRT(4./27.)))*SQRT(X/C)*(1-X/C)
         PHI(J) = ATAN2(XNODE(J+1,2)-XNODE(J,2),XNODE(J+1,1)-XNODE(J,1))
         XNODE(NELEM-J+1,1) = XNODE(J+1,1)
         XNODE(NELEM-J+1,2) = -XNODE(J+1,2)
         DS = SQRT((XNODE(J+1,1)-XNODE(J,1))**2+(XNODE(J+1,2)-XNODE(J,2))**2)
         LENGTH(J) = DS
-!        WRITE(*,*) LENGTH(J)
        END DO
 
        MEAN = SUM(LENGTH)/REAL(NELEM/2,8)
@@ -42,7 +41,6 @@ SUBROUTINE GEOMWING1(NELEM, XNODE, C, T)
         DIF(J) = (LENGTH(J)-MEAN)**2
        END DO
        SIGMA = DSQRT( 1./REAL(NELEM/2-1,8) * SUM(DIF) )
-       WRITE(*,*) SIGMA
 
        DO J = 1,NELEM/2-1
         DX(J) = MEAN*COS(PHI(J))

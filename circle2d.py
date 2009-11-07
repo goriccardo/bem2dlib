@@ -4,16 +4,16 @@
 def main():
   from bempy2d import circlegeom, srfmatbc, bcondvel, solvephi, circlefld, \
                       calcphifld, fldmatbc, fldmatbcv, calcvelfld, fieldgrid
-  from numpy import array, zeros, savetxt, eye, linspace
+  from numpy import array, zeros, savetxt, eye, linspace, sqrt, arctan2, cos
   from pylab import plot, show, grid
   nelem = 100
-  radius = 1.
+  R = 1.
   u = array([-1.,0.])
   xmin, xmax = -4.,  4.
   ymin, ymax = -3.,  3.
   nx, ny = 100, 100
   xysrf = zeros((nelem+1,2))
-  xnode = circlegeom(nelem,radius)
+  xnode = circlegeom(nelem,R)
   xysrf[:nelem,:] = xnode[:,:2]
   xysrf[nelem,:] = xnode[nelem-1,:2]
   plot(xysrf[:,0],xysrf[:,1])
@@ -22,13 +22,17 @@ def main():
   phisrf = solvephi(B,C,chisrf,nelem)
   print phisrf
   xfield = fieldgrid(xmin,xmax,nx,ymin,ymax,ny)
-  print xfield
+  r = sqrt(xfield[:,0]**2+xfield[:,1]**2)
+  th = arctan2(xfield[:,1], -xfield[:,0])
 #  plot(xfield[:,0],xfield[:,1])
 #  show()
 #  return 0
   Bf, Cf = fldmatbc(xfield, xnode)
   phifld = calcphifld(phisrf,chisrf,Bf,Cf)
-
+  phifld += r*u[0]*cos(th)
+  for i in xrange(nx*ny):
+    if r[i] < R:
+      phifld[i] = 0.
   #Bxf, Byf, Cxf, Cyf = fldmatbcv(xfield,xnode)
   #velfld = calcvelfld(phisrf,chisrf,Bxf,Byf,Cxf,Cyf)
 
@@ -43,7 +47,7 @@ def main():
 def plotphicont(X,Y,Z):
   from pylab import subplot, show, contourf, contour, colorbar, title
   spl = subplot(111)
-  cpl = contour(X,Y,Z,100)
+  cpl = contourf(X,Y,Z,100)
   colorbar(cpl)
   spl.set_aspect('equal','box')
   title(r'Field potential $\varphi$')
