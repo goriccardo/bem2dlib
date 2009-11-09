@@ -4,7 +4,7 @@
 
 !Calculate the position of the nodes
 !The formula is y = sqrt(x)*(1-x)
-!  NELEM    Figure of elements       (IN)
+!  NELEM    Figure of elements (odd) (IN)
 !  XNODE    Nodes and angles vector  (OUT)
 !  T        Thickness                (IN)
 !  C        Chord                    (IN)
@@ -23,6 +23,8 @@ SUBROUTINE GEOMWING(NELEM, XNODE, C, T)
       XNODE(1,2) = 0.
       XNODE(NELEM/2+1,1) = 0.
       XNODE(NELEM/2+1,2) = 0.
+      XNODE(NELEM/2+2,1) = 0.
+      XNODE(NELEM/2+2,2) = 0.
       !Symmetric profile
       DX(:) = C/REAL(NELEM/2,8)
       DO I = 1,NITER
@@ -30,7 +32,7 @@ SUBROUTINE GEOMWING(NELEM, XNODE, C, T)
         IF (J .LT. NELEM/2) THEN
          X = C-SUM(DX(:J))
          XNODE(J+1,1) = X
-         Y = T / SQRT(16./27.) * DSQRT(X/C)*(1.-X/C)
+         Y = T / DSQRT(16.D0/27.D0) * DSQRT(X/C)*(1.-X/C)
          XNODE(J+1,2) = Y
          XNODE(NELEM-J+1,1) = X
          XNODE(NELEM-J+1,2) = -Y
@@ -51,5 +53,7 @@ SUBROUTINE GEOMWING(NELEM, XNODE, C, T)
        END DO
        DX(1) = C - SUM(DX(2:NELEM/2))
       END DO
+      XNODE(NELEM/2+1,2) = 0.01*MEAN/2.
+      XNODE(NELEM/2+2,2) = -0.01*MEAN/2.
 END SUBROUTINE
 
