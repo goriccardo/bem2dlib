@@ -1,24 +1,6 @@
 !Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
 !Released under BSD license, see LICENSE
 
-
-!Gives the inode for the ielem
-!  IDXNODE must be 1 or 2 (first or second node of the element)
-INTEGER FUNCTION NODOFEL(NELEM, IELEM, IDXNODE)
-      IMPLICIT NONE
-      INTEGER, INTENT(IN) :: NELEM, IELEM, IDXNODE
-      IF (IDXNODE .EQ. 1) THEN
-        NODOFEL = IELEM
-        RETURN
-      END IF
-      IF (IELEM .EQ. NELEM) THEN
-        NODOFEL = 1
-        RETURN
-      END IF
-      NODOFEL = IELEM + 1
-END FUNCTION
-
-
 !Impose boundary conditions for a moving circle with u velocity
 !in the body frame of reference
 SUBROUTINE BCONDVEL(N, XNODE, U, CHI)
@@ -28,9 +10,9 @@ SUBROUTINE BCONDVEL(N, XNODE, U, CHI)
       REAL(KIND=8), DIMENSION(2), INTENT(IN) :: U
       REAL(KIND=8), DIMENSION(N), INTENT(OUT) :: CHI
       REAL(KIND=8), DIMENSION(2) :: T
-      INTEGER :: I, NODOFEL
+      INTEGER :: I, NOE
       DO I = 1, N
-       T = XNODE(NODOFEL(N,I,2),:2) - XNODE(NODOFEL(N,I,1),:2)
+       T = XNODE(NOE(N,I,1),:2) - XNODE(NOE(N,I,0),:2)
        T = T/SQRT(T(1)**2 + T(2)**2)
        CHI(I) = U(1)*T(2) - U(2)*T(1)
       END DO

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 def main():
-  from bempy2d import geomwing, geomwing1, srfmatbc, bcondvel, solvephi, circlefld, \
+  from bempy2d import geomwing, geomwing, srfmatbc, bcondvel, solvephi, circlefld, \
                       calcphifld, fldmatbc, fldmatbcv, calcvelfld, fieldgrid
   from numpy import array, zeros, savetxt, eye, linspace
   from pylab import plot, show, grid
@@ -17,7 +17,7 @@ def main():
   #print xysrf
   plot(xysrf[:,0],xysrf[:,1])
   
-  xnode = geomwing1(nelem,chord,thickness)
+  xnode = geomwing(nelem,chord,thickness)
   xysrf[:nelem,:] = xnode[:,:2]
   xysrf[nelem,:] = xnode[0,:2]
   #print xysrf

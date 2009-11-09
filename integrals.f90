@@ -79,13 +79,13 @@ SUBROUTINE SRFMATBC(N, XNODE, B, C)
       REAL(KIND=8), DIMENSION(N,N), INTENT(OUT) :: B, C
       REAL(KIND=8), DIMENSION(2) :: XI
       REAL(KIND=8) :: CIJ, BIJ
-      INTEGER :: I, J, NODOFEL
+      INTEGER :: I, J, NOE
       DO I = 1, N
        !Midpoint of I element
-       XI = (XNODE(NODOFEL(N,I,1),:2) + XNODE(NODOFEL(N,I,2),:2))/2.
+       XI = (XNODE(NOE(N,I,0),:2) + XNODE(NOE(N,I,1),:2))/2.
        C(I,I) = 0.
        DO J = 1, N
-        CALL BCIJ(XI, XNODE(NODOFEL(N,J,1),:2), XNODE(NODOFEL(N,J,2),:2),BIJ,CIJ)
+        CALL BCIJ(XI, XNODE(NOE(N,J,0),:2), XNODE(NOE(N,J,1),:2),BIJ,CIJ)
         B(I,J) = BIJ
         IF (I .NE. J) THEN
           C(I,J) = CIJ
@@ -104,11 +104,11 @@ SUBROUTINE FLDMATBC(NX, X, N, XNODE, B, C)
       REAL(KIND=8), DIMENSION(NX,N), INTENT(OUT) :: B, C
       REAL(KIND=8), DIMENSION(2) :: XI
       REAL(KIND=8) :: BIJ, CIJ
-      INTEGER :: I, J, NODOFEL
+      INTEGER :: I, J, NOE
       DO I = 1, NX
        XI = X(I,:)
        DO J = 1, N
-        CALL BCIJ(XI, XNODE(NODOFEL(N,J,1),:2), XNODE(NODOFEL(N,J,2),:2), BIJ, CIJ)
+        CALL BCIJ(XI, XNODE(NOE(N,J,0),:2), XNODE(NOE(N,J,1),:2), BIJ, CIJ)
         B(I,J) = BIJ
         C(I,J) = CIJ
        END DO
@@ -125,11 +125,11 @@ SUBROUTINE FLDMATBCV(NX, X, N, XNODE, BX, BY, CX, CY)
       REAL(KIND=8), DIMENSION(NX,N), INTENT(OUT) :: BX, BY, CX, CY
       REAL(KIND=8), DIMENSION(2) :: XI
       REAL(KIND=8) :: BIJX, BIJY, CIJX, CIJY
-      INTEGER :: I, J, NODOFEL
+      INTEGER :: I, J, NOE
       DO I = 1, NX
        XI = X(I,:)
        DO J = 1, N
-        CALL BCIJV(XI, XNODE(NODOFEL(N,J,1),:), XNODE(NODOFEL(N,J,2),:), BIJX, BIJY, CIJX, CIJY)
+        CALL BCIJV(XI, XNODE(NOE(N,J,0),:), XNODE(NOE(N,J,1),:), BIJX, BIJY, CIJX, CIJY)
         BX(I,J) = BIJX
         BY(I,J) = BIJY
         CX(I,J) = CIJX

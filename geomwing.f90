@@ -46,10 +46,10 @@ SUBROUTINE GEOMWING(NELEM, XNODE, C, T)
        END DO
        SIGMA = DSQRT( 1./DFLOAT(NELEM/2-1) * SSQ )
        !Iteration
-       DO J = 1,NELEM/2-1
-        DX(J) = MEAN*DCOS(PHI(J))
+       DO J = 0,NELEM/2-2
+        DX(NELEM/2-J) = MEAN*DCOS(PHI(NELEM/2-J))
        END DO
-       DX(NELEM/2) = C - SUM(DX(:NELEM/2-1))
+       DX(1) = C - SUM(DX(2:NELEM/2))
       END DO
 END SUBROUTINE
 
