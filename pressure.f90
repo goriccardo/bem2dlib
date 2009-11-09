@@ -46,6 +46,31 @@ subroutine calcpres(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, presr)
 end subroutine
 
 
+subroutine calccp(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, cp)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, NTstep
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      logical, intent(IN) :: TEat1
+      real(kind=8), dimension(Nelem,NTstep), intent(IN) :: phi, chi
+      real(kind=8), dimension(NTstep,2), intent(IN) :: U
+      real(kind=8), dimension(Nelem,NTstep) :: presr
+      real(kind=8), dimension(Nelem,NTstep), intent(OUT) :: cp
+      real(kind=8), intent(IN) :: dt
+      real(kind=8) :: ru2
+      real(kind=8), parameter :: EPS = 1.D-14
+      integer :: n
+      CALL calcpres(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, presr)
+      do n = 1,NTstep
+       ru2 = 0.5D0*dot_product(U(n,:),U(n,:))
+       if (ru2 .LT. EPS) then
+        cp(:,n) = 0.
+       else
+        cp(:,n) = presr(:,n)/ru2
+       end if
+      end do
+end subroutine
+
+
 !Lift on the upper side of a symmetric profile
 subroutine calchalflift(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, lift)
       IMPLICIT NONE

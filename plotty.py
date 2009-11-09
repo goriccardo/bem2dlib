@@ -48,10 +48,11 @@ def main():
     plotgeom(xnode)
     #Pressure calculation and plotting
     pres, lift = solvebem(xnode, uarr, TEat1, dt)
-    #for t in xrange(1,ntstep-1):
-    #    hru2 = 0.5*norm(uarr[t,:])**2
-    #    pres[:,t] /= hru2
-    #    lift[t] /= hru2
+    for t in xrange(ntstep):
+        hru2 = 0.5*norm(uarr[t,:])**2
+        if hru2 > 0.001:
+            pres[:,t] /= hru2
+            lift[t] /= hru2
     #pres = calcpres(xnode,TEat1,dt,u,phisrf,chisrf)
     #plot(cpoint[:,0], cpoint[:,1], 'o')
     #presplot = cpoint+pres*n
