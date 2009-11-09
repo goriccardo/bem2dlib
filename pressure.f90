@@ -72,7 +72,7 @@ end subroutine
 
 
 !Lift on the upper side of a symmetric profile
-subroutine calchalflift(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, lift)
+subroutine calcHalfLift(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, lift)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem, NTstep
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
@@ -92,9 +92,36 @@ subroutine calchalflift(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, lift)
       do n = 1,NTstep
        F = 0.
        do k = 1,Nelem/2
-        F = F + nrm(k,:)*presr(k,n)*ds(k)
+        F = F - nrm(k,:)*presr(k,n)*ds(k)
        end do
        lift(n) = F(2)
       end do
 end subroutine
 
+
+!Lift on the upper side of a symmetric profile
+subroutine calcHalfCl(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, cl)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, NTstep
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      logical, intent(IN) :: TEat1
+      real(kind=8), dimension(Nelem,NTstep), intent(IN) :: phi, chi
+      real(kind=8), dimension(NTstep,2), intent(IN) :: U
+      real(kind=8), dimension(Nelem,NTstep) :: cp
+      real(kind=8), dimension(NTstep), intent(OUT) :: cl
+      real(kind=8), intent(IN) :: dt
+      real(kind=8), dimension(Nelem) :: ds
+      real(kind=8), dimension(2):: F
+      real(kind=8), dimension(Nelem,2) :: nrm
+      integer :: k, n
+      CALL calccp(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, cp)
+      CALL normals(Nelem, Xnode, nrm)
+      CALL deltas(Nelem, Xnode, ds)
+      do n = 1,NTstep
+       F = 0.
+       do k = 1,Nelem/2
+        F = F - nrm(k,:)*cp(k,n)*ds(k)
+       end do
+       cl(n) = F(2)
+      end do
+end subroutine
