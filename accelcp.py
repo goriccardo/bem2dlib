@@ -26,9 +26,13 @@ def main():
     Ttot = 1
     oar = [10,20,30,40]
     T = linspace(0.,Ttot,ntstep)
-    uarr = sqrt(2)*sinspeedprof(ntstep,Ttot)
+    uarr = sinspeedprof(ntstep,Ttot)
+    umax = norm(uarr[-1,:])
+    hv2 = 0.5*umax**2
     dt = Ttot/(ntstep-1.)
     pres ,lift = solvebem(xnode, uarr, TEat1, dt)
+    pres /= hv2
+    lift /= hv2
     #PLOT SPEED
     figure(1)
     plotvel(uarr, Ttot, oar)
@@ -40,9 +44,9 @@ def main():
         plot(cpoint[:nelem/2+1,0],pres[:nelem/2+1,t],label=r'$t=%9.2f$' % T[t])
     legend(loc=0)
     plotgeom(xnode)
-    title(r'Pressure, $u=\sqrt{2}$')
+    title(r'Pressure')
     grid()
-    ylabel(r'$\frac{p-p_\infty}{\rho}$', size=18)
+    ylabel(r'$\frac{p-p_\infty}{\rho}$', size=22)
     xlabel(r'$x/c$', size=18)
     xticks(arange(-0.2,1.3,0.2))
     yticks(arange(-0.8,1.3,0.2))
@@ -109,7 +113,7 @@ def plotvel(uarr,Ttot,oar):
 def plotcl(cl, Ttot):
     nt = len(cl)
     plot(linspace(0.,Ttot,nt),cl)
-    title('Lift')
+    title('Lift on the upper side')
     ylabel(r'$L$', size=18)
     xlabel(r'$t$', size=18)
     grid()
