@@ -2,7 +2,7 @@
 !Released under BSD license, see LICENSE
 
 !Impose boundary conditions for a moving circle with u velocity
-!in the body frame of reference
+!in the air frame of reference
 SUBROUTINE BCONDVEL(N, XNODE, U, CHI)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: N
