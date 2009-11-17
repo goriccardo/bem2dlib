@@ -1,0 +1,5 @@
+2D Boundary Element Method solver for the Quasi-Potential Flows
+
+Dependencies:
+- f2py
+- matplotlib (for plotting)
