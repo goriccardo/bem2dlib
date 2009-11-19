@@ -62,6 +62,17 @@ subroutine normals(Nelem, Xnode, n)
 end subroutine
 
 
+!Rotation of the body with angle alpha (being positive counterclockwise) BFR
+subroutine bodyrotation(uscalar, alpha, u)
+       IMPLICIT NONE
+       real(kind=8), intent(IN) :: uscalar , alpha
+       real(kind=8), dimension(2), intent(OUT) :: u
+       REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
+       u(1) = uscalar*cos(alpha*pi/dble(180))
+       u(2) = uscalar*sin(alpha*pi/dble(180))
+end subroutine
+
+
 subroutine deltas(Nelem, Xnode, ds)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem
