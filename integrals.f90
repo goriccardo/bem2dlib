@@ -34,6 +34,22 @@ SUBROUTINE LOCFR(XS, XJM, XJP, XM, XP, YS, RM, RP)
 END SUBROUTINE
 
 
+!DIJ is the integral of dG/dn(XI,XJ) on the wake
+!  XI is on the body
+!  XJ is on the wake
+double precision function DIJ(XI, XJM, XJP)
+      IMPLICIT NONE
+      real(kind=8), dimension(2), intent(IN) :: XI, XJM, XJP
+      real(kind=8) :: XM, XP, YS, RM, RP
+      real(kind=8) :: AYS, S
+      real(kind=8), parameter :: PI = dble(4)*datan(1.D0)
+      call LocFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
+      AYS = dabs(YS)
+      S = dsign(1.D0,YS)
+      DIJ = (datan2(S*XP,AYS) - datan2(S*XM,AYS))/(dble(2)*PI)
+end function
+
+
 !BIJ is the integral of G(XI,XJ) from XJM to XJP, nodes of the J element
 !CIJ is the integral of dG/dn(XI,XJ) from XJM to XJP, nodes of the J element
 SUBROUTINE BCIJ(XI, XJM, XJP, BIJ, CIJ)
@@ -53,9 +69,9 @@ END SUBROUTINE
 
 !Calculate the matrix B and C
 !  N        Figure of elements  (IN)
+!  XNODE    Nodes vector        (IN)
 !  B        Matrix B            (OUT)
 !  C        Matrix C            (OUT)
-!  XNODE    Nodes vector        (IN)
 SUBROUTINE SRFMATBC(N, XNODE, B, C)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: N
@@ -66,10 +82,10 @@ SUBROUTINE SRFMATBC(N, XNODE, B, C)
       INTEGER :: I, J, NOE
       DO I = 1, N
        !Midpoint of I element
-       XI = (XNODE(NOE(N,I,0),:2) + XNODE(NOE(N,I,1),:2))/2.
+       XI = (XNODE(NOE(N,I,0),:) + XNODE(NOE(N,I,1),:))/2.
        C(I,I) = 0.
        DO J = 1, N
-        CALL BCIJ(XI, XNODE(NOE(N,J,0),:2), XNODE(NOE(N,J,1),:2),BIJ,CIJ)
+        CALL BCIJ(XI, XNODE(NOE(N,J,0),:), XNODE(NOE(N,J,1),:),BIJ,CIJ)
         B(I,J) = BIJ
         IF (I .NE. J) THEN
           C(I,J) = CIJ
@@ -77,6 +93,42 @@ SUBROUTINE SRFMATBC(N, XNODE, B, C)
        END DO
       END DO
 END SUBROUTINE
+
+
+!Calculate the matrices B, C and D
+!  N        Figure of elements            (IN)
+!  XNODE    Nodes vector                  (IN)
+!  NW       Number of wake elements       (IN)
+!  XWNODE   Wake's nodes vector           (IN)
+!  B        Matrix B                      (OUT)
+!  C        Matrix C                      (OUT)
+!  D        Matrix D (wake doublet int.)  (OUT)
+subroutine SrfMatBCD(N, Xnode, NW, XWnode, B, C, D)
+      IMPLICIT NONE
+      integer, intent(IN) :: N, NW
+      real(kind=8), dimension(N,2), intent(IN) :: Xnode
+      real(kind=8), dimension(NW,2), intent(IN) :: XWnode
+      real(kind=8), dimension(N,N), intent(OUT) :: B, C
+      real(kind=8), dimension(N,NW), intent(OUT) :: D
+      real(kind=8), dimension(2) :: XI
+      real(kind=8) :: CIJ, BIJ, DIJ
+      integer :: i, j, NOE
+      do i = 1, N
+       !Midpoint of the i-th element
+       XI = (Xnode(NOE(N,i,0),:) + Xnode(NOE(N,i,1),:))/2.
+       C(i,i) = 0.
+       do j = 1, N
+        call BCIJ(XI, Xnode(NOE(N,j,0),:), Xnode(NOE(N,j,1),:),BIJ,CIJ)
+        B(i,j) = BIJ
+        if (i .ne. j) then
+          C(i,j) = CIJ
+        end if
+       end do
+       do j = 1, NW-1
+        D(i,j) = DIJ(XI, XWnode(j,:), XWnode(j+1,:))
+       end do
+      end do
+end subroutine
 
 
 !Calculate B and C matrices on the field points X
