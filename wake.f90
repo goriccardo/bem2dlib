@@ -1,9 +1,9 @@
-!Copyright (c) 2009    Jelle Reichert <jellereichert@gmail.com>
+!Copyright (c) 2009 Jelle Reichert <jellereichert@gmail.com>
 !Released under BSD license, see LICENSE
 
 SUBROUTINE blabla(NELEM, TIMESTEP, PHIT) !TEMPORARY RANDOM PHI MATRIX DEPENDENT ON TIME TO SEE IF PROGRAM WORKS
-      INTEGER, INTENT(IN) :: NELEM, TIMESTEP
-      REAL(KIND=8), DIMENSION(NELEM,TIMESTEP), INTENT(OUT) :: PHIT
+      INTEGER, intent(IN) :: NELEM, TIMESTEP
+      real(kind=8), dimension(NELEM,TIMESTEP), intent(OUT) :: PHIT
       INTEGER :: I
       PHIT(:,:) = 0.
       DO I = 1,TIMESTEP
@@ -18,7 +18,7 @@ SUBROUTINE WAKE(NELEM, TIMESTEP, PHIT, DPHIW)
       integer, intent(IN) :: Nelem, timestep
       !real(kind=8), dimension(timestep,2), intent(IN) :: XWNODE
       real(kind=8), dimension(Nelem,timestep), intent(IN) :: PHIT
-      !REAL(KIND=8), DIMENSION(NELEM,NELEM) :: B, C
+      !real(kind=8), dimension(NELEM,NELEM) :: B, C
       !real(kind=8), dimension(NTstep,2), intent(IN) :: USCALAR
       real(kind=8), dimension(TIMESTEP,TIMESTEP), intent(OUT) :: DPHIW
       integer :: I, J
@@ -37,25 +37,25 @@ SUBROUTINE WAKE(NELEM, TIMESTEP, PHIT, DPHIW)
 END SUBROUTINE
 
 
-SUBROUTINE WAKEGRID(NELEM, TIMESTEP, XNODE, USCALAR, XWNODE)
-       IMPLICIT NONE
-       REAL(KIND=8), INTENT(IN) :: USCALAR
-       INTEGER, INTENT(IN) :: TIMESTEP, NELEM
-       REAL(KIND=8), DIMENSION(NELEM,2), INTENT(IN) :: XNODE
-       REAL(KIND=8), DIMENSION(TIMESTEP,2), INTENT(OUT) :: XWNODE
-       REAL(kind=8), DIMENSION(NELEM,2) :: Cpoint
-       REAL(KIND=8), DIMENSION(2) :: XHALF, CVERSOR
-       REAL(KIND=8) :: DXW, DIST
-       INTEGER :: I
-       !Determine direction of wake by cord direction
-       CALL COLLOCATION(NELEM, XNODE, CPOINT)
-       XHALF = CPOINT(NELEM/2+1,:)
-       CVERSOR = (XNODE(1,:) - XHALF)/ DIST(XNODE(1,:), XHALF)
-       DXW = USCALAR / DBLE(TIMESTEP)
-       XWNODE(1,:) = XNODE(1,:)
-       DO I = 1,TIMESTEP
-        IF (I .GT. 1) THEN
-          XWNODE(I,:) = XNODE(1,:) + (I-1)*DXW*CVERSOR
-        END IF
-       END DO
-END SUBROUTINE
+subroutine WAKEGRID(Nelem, TimeStep, Xnode, Uscalar, XWnode)
+      IMPLICIT NONE
+      real(kind=8), intent(IN) :: Uscalar
+      integer, intent(IN) :: TIMESTEP, Nelem
+      real(kind=8), dimension(NELEM,2), intent(IN) :: Xnode
+      real(kind=8), dimension(TIMESTEP,2), intent(OUT) :: XWnode
+      real(kind=8), dimension(NELEM,2) :: Cpoint
+      real(kind=8), dimension(2) :: Xhalf, Cversor
+      real(kind=8) :: DXW, DIST
+      integer :: i
+      !Determine direction of wake by cord direction
+      call collocation(Nelem, Xnode, Cpoint)
+      Xhalf = Cpoint(Nelem/2+1,:)
+      Cversor = (Xnode(1,:) - Xhalf)/ dist(Xnode(1,:), Xhalf)
+      DXW = Uscalar / DBLE(TimeStep)
+      XWnode(1,:) = Xnode(1,:)
+      do i = 1,TimeStep
+       if (i .gt. 1) then
+         XWnode(i,:) = Xnode(1,:) + (i-1)*DXW*Cversor
+       end if
+      end do
+end subroutine
