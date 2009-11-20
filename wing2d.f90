@@ -6,64 +6,72 @@
 !A circle in a _potential_ flow
 PROGRAM wing2d
       IMPLICIT NONE
-      INTEGER, PARAMETER :: NELEM = 51
+      integer, parameter :: Nelem = 9
+      integer :: i
 !     Vector of nodes global coordinates (x,y)
-      REAL(KIND=8), DIMENSION(NELEM,2) :: XNODE
+      REAL(KIND=8), DIMENSION(NELEM,2) :: Xnode
 !     Circle radius
-      REAL(KIND=8), PARAMETER :: CHORD = 1.
+      REAL(KIND=8), PARAMETER :: Chord = 1.
       REAL(KIND=8) :: uscalar = 1.
-      REAL(KIND=8) :: alpha = 6.
+      REAL(KIND=8) :: alpha = 0.
       REAL(KIND=8), DIMENSION(2) :: U
-      REAL(KIND=8) :: T = 0.3
-      INTEGER, PARAMETER :: TIMESTEP = 10.
+      REAL(KIND=8) :: Thick = 0.3
+      INTEGER, PARAMETER :: NTime = 10
 !     Potential and normal wash on the surface
-      REAL(KIND=8), DIMENSION(NELEM) :: phi, chi
-      REAL(KIND=8), DIMENSION(NELEM,NELEM) :: B, C
-      REAL(KIND=8), DIMENSION(TIMESTEP,2) :: XWNODE
-      real(kind=8), dimension(nelem, timestep) :: phit
-      real(kind=8), dimension(TIMESTEP,TIMESTEP) :: DPHIW
-!     Time length of the acceleration and end-speed
-      REAL(KIND=8), PARAMETER :: TIME = 1.
-      REAL(KIND=8), PARAMETER :: VB = 5.
+      REAL(KIND=8), DIMENSION(Nelem,Nelem) :: B, C
+      REAL(KIND=8), dimension(NTime,2) :: XWnode
+      real(kind=8), dimension(nelem, ntime) :: Chit, Phit, D
+      real(kind=8), dimension(NTime) :: DPHIW
+!     Time step
+      REAL(KIND=8) :: DT, CalcDT
 !     The program starts here!
-      CALL BODYROTATION(uscalar, alpha, u)
-      CALL GEOMWING(NELEM, XNODE, CHORD, T)
-      CALL WAKEGRID(NELEM, TIMESTEP, XNODE, USCALAR, XWNODE)
-      CALL WAKE(NELEM, TIMESTEP, PHIT, DPHIW)
-      CALL SRFMATBC(NELEM, XNODE, B, C)
-      CALL BCONDVEL(NELEM, XNODE, U, CHI)
-      CALL SOLVEPHI(NELEM, B, C, PHI, CHI)
+      CALL BodyRotation(Uscalar, alpha, U)
+      CALL GeomWing(Nelem, Xnode, Chord, Thick)
+      DT = CalcDT(Nelem, Xnode, Uscalar)
+      CALL WakeGrid(Nelem, Xnode, Uscalar, DT, NTime, XWnode)
+      CALL SrfMatBCD(Nelem, Xnode, NTime, XWnode, B, C, D)
+      do i = 1,NTime
+       CALL BCondVel(Nelem, XNODE, U, Chit(:,i))
+      end do
+      CALL SolvePhiTime(Nelem, B, C, NTime, D, Chit, Phit, DPhiW)
 !     Save results
-      CALL SAVEPHI(NELEM, PHI)
-      CALL SAVEXWNODE(TIMESTEP, XWNODE)
-      CALL SAVEDPHIW(TIMESTEP, DPHIW)
+      CALL SavePhi(Nelem, NTime, PhiT)
+      CALL SaveXWnode(NTime, XWNODE)
+      CALL SaveDPhiW(NTime, DPHIW)
 END PROGRAM
 
 
-SUBROUTINE SAVEDPHIW(TIMESTEP, DPHIW)
-      INTEGER, INTENT(IN) :: TIMESTEP
-      REAL(KIND=8), DIMENSION(TIMESTEP,TIMESTEP), INTENT(IN) :: DPHIW
+SUBROUTINE SAVEDPHIW(NTime, DPHIW)
+      INTEGER, INTENT(IN) :: NTime
+      REAL(KIND=8), DIMENSION(NTime), INTENT(IN) :: DPHIW
       OPEN(UNIT=11, FILE="dphiw")
       WRITE(11,1001) DPHIW
       CLOSE(UNIT=11)
  1001 FORMAT('',F15.6,2X)
 END SUBROUTINE
 
-SUBROUTINE SAVEXWNODE(TIMESTEP, XWNODE)
-      INTEGER, INTENT(IN) :: TIMESTEP
-      REAL(KIND=8), DIMENSION(TIMESTEP,2), INTENT(IN) :: XWNODE
+SUBROUTINE SAVEXWNODE(NTime, XWNODE)
+      INTEGER, INTENT(IN) :: NTime
+      integer :: i
+      REAL(KIND=8), DIMENSION(NTime,2), INTENT(IN) :: XWNODE
       OPEN(UNIT=12, FILE="xwnode")
-      WRITE(12,1001) XWNODE
+      do i = 1,NTime 
+       WRITE(12,1001) XWNODE(i,:)
+      end do
       CLOSE(UNIT=12)
- 1001 FORMAT('',F15.6,2X)
+ 1001 FORMAT('',2(F15.6),2X)
 END SUBROUTINE
 
 !Save the phi on the surface
-SUBROUTINE SAVEPHI(N, PHI)
-      INTEGER, INTENT(IN) :: N
-      REAL(KIND=8), DIMENSION(N), INTENT(IN) :: PHI
+SUBROUTINE SAVEPHI(N, NTime, PHIT)
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: N, NTime
+      integer :: i
+      REAL(KIND=8), DIMENSION(N,NTime), INTENT(IN) :: PHIT
       OPEN(UNIT=13, FILE="phisurf")
-      WRITE(13,1001) PHI
+      do i = 1,NTime
+       WRITE(13,1001) PhiT(:,i)
+      end do
       CLOSE(UNIT=13)
- 1001 FORMAT('',F15.6,2X)
+ 1001 FORMAT('',1000(F15.6),2X)
 END SUBROUTINE

@@ -36,3 +36,19 @@ SUBROUTINE BCIJV(XI, XJM, XJP, BIJX, BIJY, CIJX, CIJY)
       CIJX = ((XM*COS(TH)+YS*SIN(TH))/(RM**2) - (XP*COS(TH)+YS*SIN(TH))/(RP**2))/(2.*PI)
       CIJY = ((XM*SIN(TH)-YS*COS(TH))/(RM**2) - (XP*SIN(TH)-YS*COS(TH))/(RP**2))/(2.*PI)
 END SUBROUTINE
+
+
+!Calculate the velocity in the field
+!  PHISRF   On surface                          (in)
+!  CHISRF   On surface                          (in)
+!  B, C     In the field                        (in)
+!  PHIFLD   In the field                        (out)
+SUBROUTINE CALCVELFLD(N, PHISRF, CHISRF, NX, BX, BY, CX, CY, VELFLD)
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: N, NX
+      REAL(KIND=8), DIMENSION(N), INTENT(IN) :: PHISRF, CHISRF
+      REAL(KIND=8), DIMENSION(NX,N) :: BX, BY, CX, CY
+      REAL(KIND=8), DIMENSION(NX,2), INTENT(OUT) :: VELFLD
+      VELFLD(:,1) = MATMUL(BX, CHISRF) + MATMUL(CX, PHISRF)
+      VELFLD(:,2) = MATMUL(BY, CHISRF) + MATMUL(CY, PHISRF)
+END SUBROUTINE

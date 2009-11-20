@@ -42,19 +42,31 @@ SUBROUTINE SOLVEPHI(N, B, C, PHI, CHI)
 END SUBROUTINE
 
 
-!Calculate the velocity in the field
-!  PHISRF   On surface                          (in)
-!  CHISRF   On surface                          (in)
-!  B, C     In the field                        (in)
-!  PHIFLD   In the field                        (out)
-SUBROUTINE CALCVELFLD(N, PHISRF, CHISRF, NX, BX, BY, CX, CY, VELFLD)
+SUBROUTINE SOLVEPHITIME(N, B, C, NTime, D, Chi, PhiTime, DPhiW)
       IMPLICIT NONE
-      INTEGER, INTENT(IN) :: N, NX
-      REAL(KIND=8), DIMENSION(N), INTENT(IN) :: PHISRF, CHISRF
-      REAL(KIND=8), DIMENSION(NX,N) :: BX, BY, CX, CY
-      REAL(KIND=8), DIMENSION(NX,2), INTENT(OUT) :: VELFLD
-      VELFLD(:,1) = MATMUL(BX, CHISRF) + MATMUL(CX, PHISRF)
-      VELFLD(:,2) = MATMUL(BY, CHISRF) + MATMUL(CY, PHISRF)
+      integer, intent(IN) :: N, NTime
+      real(kind=8), dimension(N,N), intent(IN) :: B, C
+      real(kind=8), dimension(N,NTime), intent(IN) :: D
+      real(kind=8), dimension(N,NTime), intent(IN) :: CHI
+      real(kind=8), dimension(NTime), intent(OUT) :: DPhiW
+      real(kind=8), dimension(N,NTime), intent(OUT) :: PhiTime
+      integer :: I, INFO
+      real(kind=8), dimension(N,N) :: A
+      real(kind=8), dimension(N) :: RHS, IPIV
+      DPhiW(:) = 0.
+      A = -C
+      DO i = 1, N
+       A(i,i) = A(i,i) + DBLE(0.5)
+      END DO
+      DO I = 1,NTIME
+       RHS = MATMUL(B,CHI(:,i)) !+ MATMUL(D, DPHIW)
+       CALL DGESV(N, 1, A, N, IPIV, RHS, N, INFO)
+       IF (INFO .NE. 0) THEN
+         WRITE(*,*) "ERROR IN LINEAR SYSTEM"
+       END IF
+       PHItime(:,i) = RHS
+       CALL WAKE(N, Ntime, I, PHITime, DPhiW)
+      END DO
 END SUBROUTINE
 
 

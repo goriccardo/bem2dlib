@@ -13,7 +13,6 @@ subroutine collocation(N, Xnode, Cpoint)
       end do
 end subroutine
 
-
 !Computes the distance from vector X to Y
 double precision function dist(X, Y)
       IMPLICIT NONE
@@ -22,6 +21,16 @@ double precision function dist(X, Y)
       return
 end function
 
+!Calculate the timestep for the wake
+double precision function CalcDT(Nelem, Xnode, Uscalar)
+      IMPLICIT NONE
+      INTEGER :: Nelem
+      real(kind=8) :: Uscalar
+      REAL(KIND=8), DIMENSION(NELEM,2) :: XNODE
+      real(kind=8) :: dist
+      CalcDT = Uscalar / dist(Xnode(1,:),Xnode(2,:))
+      return
+end function
 
 !Node of element
 !  N    # of elements
@@ -68,7 +77,7 @@ subroutine bodyrotation(uscalar, alpha, u)
        real(kind=8), intent(IN) :: uscalar , alpha
        real(kind=8), dimension(2), intent(OUT) :: u
        REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
-       u(1) = uscalar*cos(alpha*pi/dble(180))
+       u(1) =-uscalar*cos(alpha*pi/dble(180))
        u(2) = uscalar*sin(alpha*pi/dble(180))
 end subroutine
 

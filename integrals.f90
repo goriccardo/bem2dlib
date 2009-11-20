@@ -42,11 +42,12 @@ double precision function DIJ(XI, XJM, XJP)
       real(kind=8), dimension(2), intent(IN) :: XI, XJM, XJP
       real(kind=8) :: XM, XP, YS, RM, RP
       real(kind=8) :: AYS, S
-      real(kind=8), parameter :: PI = dble(4)*datan(1.D0)
+      real(kind=8), parameter :: PI = dble(4.)*datan(1.D0)
       call LocFR(XI, XJM, XJP, XM, XP, YS, RM, RP)
       AYS = dabs(YS)
       S = dsign(1.D0,YS)
-      DIJ = (datan2(S*XP,AYS) - datan2(S*XM,AYS))/(dble(2)*PI)
+      DIJ = (datan2(S*XP,AYS) - datan2(S*XM,AYS))/(dble(2.)*PI)
+      return
 end function
 
 
@@ -124,8 +125,9 @@ subroutine SrfMatBCD(N, Xnode, NW, XWnode, B, C, D)
           C(i,j) = CIJ
         end if
        end do
-       do j = 1, NW-1
-        D(i,j) = DIJ(XI, XWnode(j,:), XWnode(j+1,:))
+       D(I,1) = DIJ(XI, Xnode(1,:), XWnode(1,:))
+       do j = 2, NW
+        D(i,j) = DIJ(XI, XWnode(j-1,:), XWnode(j,:))
        end do
       end do
 end subroutine
