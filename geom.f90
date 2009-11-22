@@ -77,8 +77,8 @@ subroutine bodyrotation(uscalar, alpha, u)
        real(kind=8), intent(IN) :: uscalar , alpha
        real(kind=8), dimension(2), intent(OUT) :: u
        REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
-       u(1) =-uscalar*cos(alpha*pi/dble(180))
-       u(2) = uscalar*sin(alpha*pi/dble(180))
+       u(1) = -uscalar*cos(alpha*pi/dble(180))
+       u(2) = -uscalar*sin(alpha*pi/dble(180))
 end subroutine
 
 
