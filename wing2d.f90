@@ -6,8 +6,8 @@
 !A circle in a _potential_ flow
 PROGRAM wing2d
       IMPLICIT NONE
-      integer, parameter :: Nelem = 19
-      integer, parameter :: NTime = 10
+      integer, parameter :: Nelem = 29
+      integer, parameter :: NTime = 50
       integer :: i
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(NELEM,2) :: Xnode
@@ -40,8 +40,8 @@ PROGRAM wing2d
       end do
       call SolvePhiTime(Nelem, B, C, NTime, D, Chit, Phit, DPhiW)
       call CalcCl(Nelem, Xnode, TEat1, NTime, DT, Ut, Phit, Chit, cl)
-      write(*,*) cl
 !     Save results
+      call SaveCL(NTime, cl)
       call SavePhi(Nelem, NTime, PhiT)
       call SaveXWnode(NTime, XWNODE)
       call SaveDPhiW(NTime, DPHIW)
@@ -54,6 +54,15 @@ SUBROUTINE SAVEDPHIW(NTime, DPHIW)
       OPEN(UNIT=11, FILE="dphiw")
       WRITE(11,1001) DPHIW
       CLOSE(UNIT=11)
+ 1001 FORMAT('',F15.6,2X)
+END SUBROUTINE
+
+SUBROUTINE SAVECL(NTime, CL)
+      integer, intent(IN) :: NTime
+      real(kind=8), dimension(NTime), intent(IN) :: CL
+      OPEN(UNIT=14, FILE="cltime")
+      WRITE(14,1001) CL
+      CLOSE(UNIT=14)
  1001 FORMAT('',F15.6,2X)
 END SUBROUTINE
 
@@ -82,3 +91,5 @@ SUBROUTINE SAVEPHI(N, NTime, PHIT)
       CLOSE(UNIT=13)
  1001 FORMAT('',1000(F15.6),2X)
 END SUBROUTINE
+
+
