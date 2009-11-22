@@ -17,7 +17,7 @@ all: wing2d circle2d
 wing2d: $(WOBJS)
 	$(F90) $(LDFLAGS) -o $@ $(WOBJS) $(LIBS)
     
-circle2s: $(COBJS)
+circle2d: $(COBJS)
 	$(F90) $(LDFLAGS) -o $@ $(COBJS) $(LIBS)
 
 clean:
