@@ -21,6 +21,7 @@ PROGRAM wing2d
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
       real(kind=8), dimension(NTime,2) :: XWnode
+      real(kind=8), dimension(Nelem,2) :: srfvelend, CPoint
       real(kind=8), dimension(Nelem, Ntime) :: Chit, Phit, D
       real(kind=8), dimension(NTime) :: DPHIW
       real(kind=8), dimension(NTime) :: cl
@@ -40,6 +41,13 @@ PROGRAM wing2d
       end do
       call SolvePhiTime(Nelem, B, C, NTime, D, Chit, Phit, DPhiW)
       call CalcCl(Nelem, Xnode, TEat1, NTime, DT, Ut, Phit, Chit, cl)
+      call CalcSrfVel(Nelem, Xnode, TEat1, Phit(:,NTime), Chit(:,NTime), srfvelend)
+      call collocation(Nelem, Xnode, Cpoint)
+      open(unit=15, file='endvel')
+      do i = 1,Nelem
+       write(15,*) Cpoint(i,:), srfvelend(i,:)
+      end do
+      close(unit=15)
 !     Save results
       call SaveCL(NTime, cl)
       call SavePhi(Nelem, NTime, PhiT)
