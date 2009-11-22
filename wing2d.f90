@@ -9,21 +9,21 @@ PROGRAM wing2d
       integer, parameter :: Nelem = 9
       integer :: i
 !     Vector of nodes global coordinates (x,y)
-      REAL(KIND=8), DIMENSION(NELEM,2) :: Xnode
+      real(kind=8), dimension(NELEM,2) :: Xnode
 !     Circle radius
-      REAL(KIND=8), PARAMETER :: Chord = 1.
-      REAL(KIND=8) :: uscalar = 1.
-      REAL(KIND=8) :: alpha = 0.
-      REAL(KIND=8), DIMENSION(2) :: U
-      REAL(KIND=8) :: Thick = 0.3
-      INTEGER, PARAMETER :: NTime = 10
+      real(kind=8), parameter :: Chord = 1.
+      real(kind=8) :: uscalar = 1.
+      real(kind=8) :: alpha = 6.
+      real(kind=8), dimension(2) :: U
+      real(kind=8) :: Thick = 0.3
+      integer, parameter :: NTime = 10
 !     Potential and normal wash on the surface
-      REAL(KIND=8), DIMENSION(Nelem,Nelem) :: B, C
-      REAL(KIND=8), dimension(NTime,2) :: XWnode
-      real(kind=8), dimension(nelem, ntime) :: Chit, Phit, D
+      real(kind=8), dimension(Nelem,Nelem) :: B, C
+      real(kind=8), dimension(NTime,2) :: XWnode
+      real(kind=8), dimension(Nelem, Ntime) :: Chit, Phit, D
       real(kind=8), dimension(NTime) :: DPHIW
 !     Time step
-      REAL(KIND=8) :: DT, CalcDT
+      real(kind=8) :: DT, CalcDT
 !     The program starts here!
       CALL BodyRotation(Uscalar, alpha, U)
       CALL GeomWing(Nelem, Xnode, Chord, Thick)
@@ -42,8 +42,8 @@ END PROGRAM
 
 
 SUBROUTINE SAVEDPHIW(NTime, DPHIW)
-      INTEGER, INTENT(IN) :: NTime
-      REAL(KIND=8), DIMENSION(NTime), INTENT(IN) :: DPHIW
+      integer, intent(IN) :: NTime
+      real(kind=8), dimension(NTime), intent(IN) :: DPHIW
       OPEN(UNIT=11, FILE="dphiw")
       WRITE(11,1001) DPHIW
       CLOSE(UNIT=11)
@@ -51,12 +51,12 @@ SUBROUTINE SAVEDPHIW(NTime, DPHIW)
 END SUBROUTINE
 
 SUBROUTINE SAVEXWNODE(NTime, XWNODE)
-      INTEGER, INTENT(IN) :: NTime
+      integer, intent(IN) :: NTime
       integer :: i
-      REAL(KIND=8), DIMENSION(NTime,2), INTENT(IN) :: XWNODE
+      real(kind=8), dimension(NTime,2), intent(IN) :: XWnode
       OPEN(UNIT=12, FILE="xwnode")
       do i = 1,NTime 
-       WRITE(12,1001) XWNODE(i,:)
+       WRITE(12,1001) XWnode(i,:)
       end do
       CLOSE(UNIT=12)
  1001 FORMAT('',2(F15.6),2X)
@@ -65,9 +65,9 @@ END SUBROUTINE
 !Save the phi on the surface
 SUBROUTINE SAVEPHI(N, NTime, PHIT)
       IMPLICIT NONE
-      INTEGER, INTENT(IN) :: N, NTime
+      integer, intent(IN) :: N, NTime
       integer :: i
-      REAL(KIND=8), DIMENSION(N,NTime), INTENT(IN) :: PHIT
+      real(kind=8), dimension(N,NTime), intent(IN) :: PHIT
       OPEN(UNIT=13, FILE="phisurf")
       do i = 1,NTime
        WRITE(13,1001) PhiT(:,i)

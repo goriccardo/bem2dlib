@@ -51,7 +51,7 @@ SUBROUTINE SOLVEPHITIME(N, B, C, NTime, D, Chi, PhiTime, DPhiW)
       real(kind=8), dimension(NTime), intent(OUT) :: DPhiW
       real(kind=8), dimension(N,NTime), intent(OUT) :: PhiTime
       integer :: I, INFO
-      real(kind=8), dimension(N,N) :: A
+      real(kind=8), dimension(N,N) :: A, ATEMP
       real(kind=8), dimension(N) :: RHS, IPIV
       DPhiW(:) = 0.
       A = -C
@@ -59,8 +59,9 @@ SUBROUTINE SOLVEPHITIME(N, B, C, NTime, D, Chi, PhiTime, DPhiW)
        A(i,i) = A(i,i) + DBLE(0.5)
       END DO
       DO I = 1,NTIME
-       RHS = MATMUL(B,CHI(:,i)) !+ MATMUL(D, DPHIW)
-       CALL DGESV(N, 1, A, N, IPIV, RHS, N, INFO)
+       ATEMP = A
+       RHS = MATMUL(B,CHI(:,i)) + MATMUL(D, DPHIW)
+       CALL DGESV(N, 1, ATEMP, N, IPIV, RHS, N, INFO)
        IF (INFO .NE. 0) THEN
          WRITE(*,*) "ERROR IN LINEAR SYSTEM"
        END IF
