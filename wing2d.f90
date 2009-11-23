@@ -24,6 +24,7 @@ PROGRAM wing2d
       real(kind=8), dimension(NWake,2) :: XWnode
       real(kind=8), dimension(Nelem,2) :: SrfVelEnd, CPoint
       real(kind=8), dimension(Nelem, NTime) :: Chit, Phit
+      real(kind=8), dimension(Nelem/2, NTime) :: DPhiBody
       real(kind=8), dimension(Nelem, NWake) :: D
       real(kind=8), dimension(NWake, NTime) :: DPhiW
       real(kind=8), dimension(NTime) :: cl
@@ -52,31 +53,31 @@ PROGRAM wing2d
        write(16,*) cp(:,i)
       end do
       call CalcSrfVel(Nelem, Xnode, TEat1, Phit(:,1), Chit(:,1), srfvelend)
+      call CalcDPhiBody(Nelem, NTime, PhiT, DPhiBody)
+      open(unit=16, file='dphi')
+      do i = 1,NTime
+       write(16,*) DPhiBody(:,i), DPhiW(:,i)
+      end do
+      close(unit=16)      
       call Collocation(Nelem, Xnode, Cpoint)
       open(unit=15, file='endvel')
       do i = 1,Nelem
        write(15,*) Cpoint(i,:), srfvelend(i,:)
       end do
       close(unit=15)
+      open(unit=19, file='cpoints')
+      do i = 1,Nelem/2
+       write(19,*) Cpoint(Nelem/2-i+1,:)
+      end do
+      do i = 1,NWake
+       write(19,*) XWnode(i,:)
+      end do
+      close(unit=19)
 !     Save results
       call SaveCL(NTime, cl)
       call SavePhi(Nelem, NWake, PhiT)
       call SaveXWnode(NWake, XWnode)
-      call SaveDPhiW(NWake, NTime, DPhiW)
 END PROGRAM
-
-
-SUBROUTINE SaveDPhiW(NWake, NTime, DPhiW)
-      integer, intent(IN) :: NWake,NTime
-      integer :: i
-      real(kind=8), dimension(NWake,NTime), intent(IN) :: DPhiW
-      OPEN(UNIT=11, FILE="dphiw")
-      do i = 1,NTime
-       write(11,1001) DPhiW(:,i)
-      end do
-      CLOSE(UNIT=11)
- 1001 FORMAT('',1000(F15.6),2X)
-END SUBROUTINE
 
 SUBROUTINE SAVECL(NWake, CL)
       integer, intent(IN) :: NWake

@@ -28,15 +28,19 @@ subroutine calcpres(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, presr)
       !For each timestep
       dphidt(:) = 0.
       presr(:,1) = 0.
-      do n = 2,NTstep
+      do n = 1,NTstep
        !Foreach element
-       dphidt = (phi(:,n) - phi(:,n-1)) / dt
-       CALL CalcSrfVel(Nelem, Xnode, TEat1, phi(:,n), chi(:,n), srfvel)
-       do k = 1,Nelem
-        v2 = dot_product(srfvel(k,:), srfvel(k,:))
-        timeder = dphidt(k)
-        presr(k,n) = dot_product(U(n,:),srfvel(k,:)) - v2/dble(2) - timeder
-       end do
+       if (n .GT. 1) then
+        dphidt = (phi(:,n) - phi(:,n-1)) / dt
+       end if
+       if (NTstep .GT. 1) then
+        CALL CalcSrfVel(Nelem, Xnode, TEat1, phi(:,n), chi(:,n), srfvel)
+        do k = 1,Nelem
+         v2 = dot_product(srfvel(k,:), srfvel(k,:))
+         timeder = dphidt(k)
+         presr(k,n) = dot_product(U(n,:),srfvel(k,:)) - v2/dble(2) - timeder
+        end do
+       end if
       end do
 end subroutine
 
@@ -149,3 +153,18 @@ subroutine CalcCl(Nelem, Xnode, TEat1, NTime, dt, U, phi, chi, cl)
        cl(n) = F(2)
       end do
 end subroutine
+
+
+subroutine CalcDPhiBody(Nelem, NTime, PhiT, DPhiBody)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, NTime
+      real(kind=8), dimension(Nelem,NTime), intent(IN) :: PhiT
+      real(kind=8), dimension(Nelem/2,NTime), intent(OUT) :: DPhiBody
+      integer :: i, j
+      do i = 1,NTime
+       do j = 1,Nelem/2
+        DPhiBody(Nelem-j+1,i) = PhiT(j,i) - PhiT(Nelem-j,i)
+       end do
+      end do
+end subroutine
+
