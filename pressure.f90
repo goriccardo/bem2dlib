@@ -163,7 +163,7 @@ subroutine CalcDPhiBody(Nelem, NTime, PhiT, DPhiBody)
       integer :: i, j
       do i = 1,NTime
        do j = 1,Nelem/2
-        DPhiBody(Nelem-j+1,i) = PhiT(j,i) - PhiT(Nelem-j,i)
+        DPhiBody(Nelem-j+1,i) = PhiT(j,i) - PhiT(Nelem-j+1,i)
        end do
       end do
 end subroutine

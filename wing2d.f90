@@ -6,8 +6,8 @@
 !A circle in a _potential_ flow
 PROGRAM wing2d
       IMPLICIT NONE
-      integer, parameter :: Nelem = 59
-      integer, parameter :: NTime = 2000
+      integer, parameter :: Nelem = 129
+      integer, parameter :: NTime = 3000
       integer, parameter :: NWake = (Nelem+1)/2*10
       integer :: i
 !     Vector of nodes global coordinates (x,y)
@@ -55,8 +55,8 @@ PROGRAM wing2d
       call CalcSrfVel(Nelem, Xnode, TEat1, Phit(:,1), Chit(:,1), srfvelend)
       call CalcDPhiBody(Nelem, NTime, PhiT, DPhiBody)
       open(unit=16, file='dphi')
-      do i = 1,NTime
-       write(16,*) DPhiBody(:,i), DPhiW(:,i)
+      do i = 2,NTime
+       write(16,*) DPhiBody(:,i), DPhiW(:,i-1)
       end do
       close(unit=16)      
       call Collocation(Nelem, Xnode, Cpoint)
