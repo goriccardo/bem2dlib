@@ -1,5 +1,7 @@
-SRCS = pressure.f90 geom.f90 fieldgrid.f90 wake.f90 velocity.f90 geomwing.f90 integrals.f90 bem2d.f90 \
-       geomcircle.f90 circle2d.f90 crappyvel.f90
+LIBSRCS = pressure.f90 geom.f90 fieldgrid.f90 wake.f90 velocity.f90 geomwing.f90 integrals.f90 bem2d.f90 \
+          geomcircle.f90 crappyvel.f90
+
+SRCS = $(LIBSRCS) circle2d.f90 wing2d.f90
 
 OBJS = pressure.o geom.o fieldgrid.o wake.o velocity.o integrals.o bem2d.o
 
@@ -22,6 +24,9 @@ circle2d: $(COBJS)
 
 clean:
 	rm -f $(COBJS) $(WOBJS)
+
+python:
+	f2py -c $(LIBS) -m bempy2d $(LIBSRCS)
 
 .SUFFIXES: $(SUFFIXES) .f90
 
