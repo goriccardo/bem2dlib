@@ -2,6 +2,7 @@
 !Released under BSD license, see LICENSE
 
 
+!Surface velocity in the Air Frame of Reference
 subroutine calcsrfvel(Nelem, Xnode, TEat1, phi, chi, srfvel)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem
@@ -13,11 +14,11 @@ subroutine calcsrfvel(Nelem, Xnode, TEat1, phi, chi, srfvel)
       real(kind=8), dimension(2) :: t, n
       real(kind=8) :: dist
       integer :: k, kp1, NOE
-      CALL calcdphids(Nelem, Xnode, TEat1, phi, dphids)
+      call CalcDPhiDs(Nelem, Xnode, TEat1, phi, dphids)
       do k = 1,Nelem
        kp1 = NOE(Nelem, k, 1)
-       t = (Xnode(k,:) - Xnode(kp1,:))/dist(Xnode(k,:), Xnode(kp1,:))
-       n = (/-t(2), t(1)/)
+       t = (Xnode(kp1,:) - Xnode(k,:))/dist(Xnode(k,:), Xnode(kp1,:))
+       n = (/t(2), -t(1)/)
        srfvel(k,:) = chi(k)*n + dphids(k)*t
       end do
 end subroutine
@@ -31,23 +32,23 @@ subroutine calcdphids(Nelem, Xnode, TEat1, phi, dphids)
       logical, intent(IN) :: TEat1
       real(kind=8), dimension(Nelem), intent(IN) :: phi
       real(kind=8), dimension(Nelem), intent(OUT) :: dphids
-      real(kind=8) :: dist, h1, h2
-      integer :: NOE, k, km1, kp1, kp2, stk = 1
+      real(kind=8), dimension(Nelem) :: DS
+      real(kind=8) :: dist, h
+      integer :: NOE, k, km1, kp1, stk = 1
       !If there is a trailing edge we do a special derivative for first and last
+      call DeltaS(Nelem, Xnode, DS)
       if (TEat1) then
-       h1 = dist( (Xnode(3,:) + Xnode(2,:))/2., (Xnode(2,:) + Xnode(1,:))/2. )
-       dphids(1) = (phi(1) - phi(2)) / h1
-       h1 = dist( (Xnode(1,:) + Xnode(Nelem,:))/2., (Xnode(Nelem,:) + Xnode(Nelem-1,:))/2. )
-       dphids(Nelem) = (phi(Nelem-1) - phi(Nelem)) / h1
+       h = dist( (Xnode(3,:) + Xnode(2,:))/2., (Xnode(2,:) + Xnode(1,:))/2. )
+       dphids(1) = (phi(2) - phi(1)) / h
+       h = dist( (Xnode(1,:) + Xnode(Nelem,:))/2., (Xnode(Nelem,:) + Xnode(Nelem-1,:))/2. )
+       dphids(Nelem) = (phi(Nelem) - phi(Nelem-1)) / h
        stk = 2
       end if
       do k = stk,Nelem+1-stk
        km1 = NOE(Nelem, k,-1)
        kp1 = NOE(Nelem, k, 1)
-       kp2 = NOE(Nelem, k, 2)
-       h1 = dist( (Xnode(kp1,:) + Xnode(k,:))/2., (Xnode(k,:) + Xnode(km1,:))/2. )
-       h2 = dist( (Xnode(kp1,:) + Xnode(k,:))/2., (Xnode(kp2,:) + Xnode(kp1,:))/2. )
-       dphids(k) = ( phi(km1) - phi(kp1) ) / (h1 + h2)
+       h = (DS(km1)+DS(kp1))/dble(2)+DS(k)
+       dphids(k) = ( phi(kp1) - phi(km1) ) / h
       end do
 end subroutine
 

@@ -22,13 +22,13 @@ double precision function dist(X, Y)
 end function
 
 !Calculate the timestep for the wake
-double precision function CalcDT(Nelem, Xnode, Uscalar)
+double precision function CalcDT(Nelem, Xnode, UHoriz)
       IMPLICIT NONE
       INTEGER :: Nelem
-      real(kind=8) :: Uscalar
-      REAL(KIND=8), DIMENSION(NELEM,2) :: XNODE
+      real(kind=8) :: UHoriz
+      real(KIND=8), dimension(Nelem,2) :: XNODE
       real(kind=8) :: dist
-      CalcDT = Uscalar / dist(Xnode(1,:),Xnode(2,:))
+      CalcDT = dist(Xnode(1,:),Xnode(2,:)) / UHoriz
       return
 end function
 
@@ -76,13 +76,13 @@ subroutine bodyrotation(uscalar, alpha, u)
        IMPLICIT NONE
        real(kind=8), intent(IN) :: uscalar , alpha
        real(kind=8), dimension(2), intent(OUT) :: u
-       REAL(KIND=8), PARAMETER :: PI = 4.*ATAN(1.)
+       REAL(KIND=8), PARAMETER :: PI = 4.D0*datan(1.D0)
        u(1) = -uscalar*cos(alpha*pi/dble(180))
        u(2) = -uscalar*sin(alpha*pi/dble(180))
 end subroutine
 
 
-subroutine deltas(Nelem, Xnode, ds)
+subroutine DeltaS(Nelem, Xnode, ds)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode

@@ -42,32 +42,32 @@ SUBROUTINE SOLVEPHI(N, B, C, PHI, CHI)
 END SUBROUTINE
 
 
-SUBROUTINE SOLVEPHITIME(N, B, C, NTime, D, Chi, PhiTime, DPhiW)
+SUBROUTINE SolvePhiTime(N, B, C, NWake, D, NTime, ChiTime, PhiTime, DPhiW)
       IMPLICIT NONE
-      integer, intent(IN) :: N, NTime
+      integer, intent(IN) :: N, NWake, NTime
       real(kind=8), dimension(N,N), intent(IN) :: B, C
-      real(kind=8), dimension(N,NTime), intent(IN) :: D
-      real(kind=8), dimension(N,NTime), intent(IN) :: CHI
-      real(kind=8), dimension(NTime), intent(OUT) :: DPhiW
+      real(kind=8), dimension(N,NWake), intent(IN) :: D
+      real(kind=8), dimension(N,NTime), intent(IN) :: ChiTime
+      real(kind=8), dimension(NWake,NTime), intent(OUT) :: DPhiW
       real(kind=8), dimension(N,NTime), intent(OUT) :: PhiTime
       integer :: I, INFO
       real(kind=8), dimension(N,N) :: A, ATEMP
       real(kind=8), dimension(N) :: RHS, IPIV
-      DPhiW(:) = 0.
+      DPhiW(:,:) = 0.
       A = -C
-      DO i = 1, N
+      do i = 1, N
        A(i,i) = A(i,i) + DBLE(0.5)
-      END DO
-      DO I = 1,NTIME
-       ATEMP = A
-       RHS = MATMUL(B,CHI(:,i)) + MATMUL(D, DPHIW)
+      end do
+      do i = 1,NTime
+       ATemp = A
+       RHS = MATMUL(B,ChiTime(:,i)) + MATMUL(D, DPhiW(:,i))
        CALL DGESV(N, 1, ATEMP, N, IPIV, RHS, N, INFO)
        IF (INFO .NE. 0) THEN
          WRITE(*,*) "ERROR IN LINEAR SYSTEM"
        END IF
-       PHItime(:,i) = RHS
-       CALL WAKE(N, Ntime, I, PHITime, DPhiW)
-      END DO
+       PhiTime(:,i) = RHS
+       CALL Wake(N, NWake, NTime, i, PhiTime, DPhiW)
+      end do
 END SUBROUTINE
 
 

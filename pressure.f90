@@ -24,23 +24,18 @@ subroutine calcpres(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, presr)
       real(kind=8), dimension(Nelem) :: dphidt
       real(kind=8), dimension(Nelem,2) :: srfvel
       real(kind=8) :: v2, timeder
-      integer :: k, km1, n, NOE
+      integer :: k, n
       !For each timestep
       dphidt(:) = 0.
-      do n = 1,NTstep
+      presr(:,1) = 0.
+      do n = 2,NTstep
        !Foreach element
-       if (n .GT. 1) then
-        dphidt = (phi(:,n) - phi(:,n-1)) / dt
-       end if
-       CALL calcsrfvel(Nelem, Xnode, TEat1, phi(:,n), chi(:,n), srfvel)
+       dphidt = (phi(:,n) - phi(:,n-1)) / dt
+       CALL CalcSrfVel(Nelem, Xnode, TEat1, phi(:,n), chi(:,n), srfvel)
        do k = 1,Nelem
         v2 = dot_product(srfvel(k,:), srfvel(k,:))
-        km1 = NOE(Nelem, k, -1)
-        if (TEat1 .and. (k .eq. 1)) then
-         km1 = 2
-        end if
         timeder = dphidt(k)
-        presr(k,n) = dot_product(U(n,:),srfvel(k,:)) - v2/2. - timeder
+        presr(k,n) = dot_product(U(n,:),srfvel(k,:)) - v2/dble(2) - timeder
        end do
       end do
 end subroutine
@@ -63,7 +58,7 @@ subroutine calccp(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, cp)
       do n = 1,NTstep
        ru2 = 0.5D0*dot_product(U(n,:),U(n,:))
        if (ru2 .LT. EPS) then
-        cp(:,n) = 0.
+        cp(:,n) = 0.D0
        else
         cp(:,n) = presr(:,n)/ru2
        end if
@@ -129,24 +124,24 @@ end subroutine
 
 
 !Lift on the upper side of a symmetric profile
-subroutine CalcCl(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, cl)
+subroutine CalcCl(Nelem, Xnode, TEat1, NTime, dt, U, phi, chi, cl)
       IMPLICIT NONE
-      integer, intent(IN) :: Nelem, NTstep
+      integer, intent(IN) :: Nelem, NTime
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       logical, intent(IN) :: TEat1
-      real(kind=8), dimension(Nelem,NTstep), intent(IN) :: phi, chi
-      real(kind=8), dimension(NTstep,2), intent(IN) :: U
-      real(kind=8), dimension(Nelem,NTstep) :: cp
-      real(kind=8), dimension(NTstep), intent(OUT) :: cl
+      real(kind=8), dimension(Nelem,NTime), intent(IN) :: phi, chi
+      real(kind=8), dimension(NTime,2), intent(IN) :: U
+      real(kind=8), dimension(Nelem,NTime) :: cp
+      real(kind=8), dimension(NTime), intent(OUT) :: cl
       real(kind=8), intent(IN) :: dt
       real(kind=8), dimension(Nelem) :: ds
       real(kind=8), dimension(2):: F
       real(kind=8), dimension(Nelem,2) :: nrm
       integer :: k, n
-      CALL calccp(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, cp)
+      CALL calccp(Nelem, Xnode, TEat1, NTime, dt, U, phi, chi, cp)
       CALL normals(Nelem, Xnode, nrm)
       CALL deltas(Nelem, Xnode, ds)
-      do n = 1,NTstep
+      do n = 1,NTime
        F = 0.
        do k = 1,Nelem
         F = F - nrm(k,:)*cp(k,n)*ds(k)
