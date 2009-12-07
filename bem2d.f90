@@ -19,6 +19,22 @@ SUBROUTINE BCONDVEL(N, XNODE, U, CHI)
 END SUBROUTINE
 
 
+subroutine BCondLap(N, Xnode, U, ChiLap)
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: N
+      REAL(KIND=8), DIMENSION(N,2), INTENT(IN) :: Xnode
+      REAL(KIND=8), DIMENSION(2), INTENT(IN) :: U
+      complex(kind=8), DIMENSION(N), INTENT(OUT) :: ChiLap
+      REAL(KIND=8), DIMENSION(2) :: T
+      INTEGER :: I, NOE
+      DO I = 1, N
+       T = XNODE(NOE(N,I,1),:2) - XNODE(NOE(N,I,0),:2)
+       T = T/SQRT(T(1)**2 + T(2)**2)
+       ChiLap(I) = dcmplx(U(1)*T(2) - U(2)*T(1), 0.)
+      END DO
+end subroutine
+
+
 !Solve the (NxN) linear system (0.5*I - C)*phi = C*chi
 SUBROUTINE SOLVEPHI(N, B, C, PHI, CHI)
       IMPLICIT NONE
@@ -68,6 +84,29 @@ SUBROUTINE SolvePhiTime(N, B, C, NWake, D, NTime, ChiTime, PhiTime, DPhiW)
        PhiTime(:,i) = RHS
        CALL Wake(N, NWake, NTime, i, PhiTime, DPhiW)
       end do
+END SUBROUTINE
+
+
+SUBROUTINE SolvePhiLap(N, B, C, DRS, ChiLap, PhiLap)
+      IMPLICIT NONE
+      integer, intent(IN) :: N
+      real(kind=8), dimension(N,N), intent(IN) :: B, C
+      complex(kind=8), dimension(N,N), intent(IN) :: DRS
+      complex(kind=8), dimension(N), intent(IN) :: ChiLap
+      complex(kind=8), dimension(N), intent(OUT) :: PhiLap
+      integer :: I, INFO
+      complex(kind=8), dimension(N,N) :: A
+      complex(kind=8), dimension(N) :: RHS, IPIV
+      A = - C - DRS
+      do i = 1, N
+       A(i,i) = A(i,i) + DBLE(0.5)
+      end do
+      RHS = MATMUL(B,ChiLap)
+      CALL ZGESV(N, 1, A, N, IPIV, RHS, N, INFO)
+      IF (INFO .NE. 0) THEN
+        WRITE(*,*) "ERROR IN LINEAR SYSTEM"
+      END IF
+      PhiLap = RHS
 END SUBROUTINE
 
 

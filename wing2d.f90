@@ -13,12 +13,11 @@ PROGRAM wing2d
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
-      real(kind=8), parameter :: Chord = 1.
+      real(kind=8), parameter :: Chord = 1., Thick = 0.1
       real(kind=8) :: UHoriz, uscalar = 1., Freq = 0.1, Ampl = 0.15
       real(kind=8) :: alpha = 4.
       real(kind=8), dimension(2) :: U
       real(kind=8), dimension(NTime,2) :: Ut
-      real(kind=8) :: Thick = 0.1
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
       real(kind=8), dimension(NWake,2) :: XWnode

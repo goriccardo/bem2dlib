@@ -32,3 +32,27 @@ SUBROUTINE Wake(Nelem, NWake, NTime, ITime, PhiTime, DPhiW)
       DPhiW(2:,ITime+1) = DPhiW(:NWake-1,ITime)
       DPhiW(1,ITime+1) = PhiTime(1,ITime) - PhiTime(Nelem,ITime)
 END SUBROUTINE
+
+
+!Super cool matrix D*R*S. D is aka F
+!R is the retard (delays) matrix
+!S is the stupid matrix
+!DRS is a 'temple' matrix (name by Robin & Martin)
+subroutine MatDRS(Nelem, NWake, D, DT, s, DRS)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, NWake
+      real(kind=8), dimension(Nelem,NWake), intent(IN) :: D
+      real(kind=8), intent(IN) :: DT
+      complex, intent(IN) :: s
+      complex, dimension(NWake) :: Rvec
+      complex, dimension(Nelem,Nelem), intent(OUT) :: DRS
+      integer :: i
+      DRS(:,:) = 0.
+      do i = 1,NWake
+       Rvec(i) = cdexp(-s*DT*i)
+      end do
+      do i = 1,Nelem
+       DRS(i,1) = dot_product(D(i,:),Rvec)
+       DRS(i,Nelem) = -DRS(i,1)
+      end do
+end subroutine
