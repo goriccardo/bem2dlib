@@ -13,6 +13,7 @@ subroutine collocation(N, Xnode, Cpoint)
       end do
 end subroutine
 
+
 !Computes the distance from vector X to Y
 double precision function dist(X, Y)
       IMPLICIT NONE
@@ -20,6 +21,7 @@ double precision function dist(X, Y)
       dist = dsqrt( (X(1)-Y(1))**2 + (X(2)-Y(2))**2 )
       return
 end function
+
 
 !Calculate the timestep for the wake
 double precision function CalcDT(Nelem, Xnode, UHoriz)
@@ -31,6 +33,7 @@ double precision function CalcDT(Nelem, Xnode, UHoriz)
       CalcDT = dist(Xnode(1,:),Xnode(2,:)) / UHoriz
       return
 end function
+
 
 !Node of element
 !  N    # of elements
@@ -77,8 +80,27 @@ subroutine bodyrotation(uscalar, alpha, u)
        real(kind=8), intent(IN) :: uscalar , alpha
        real(kind=8), dimension(2), intent(OUT) :: u
        REAL(KIND=8), PARAMETER :: PI = 4.D0*datan(1.D0)
-       u(1) = -uscalar*cos(alpha*pi/dble(180))
-       u(2) = -uscalar*sin(alpha*pi/dble(180))
+       u(1) = -uscalar*dcos(alpha*pi/dble(180))
+       u(2) = -uscalar*dsin(alpha*pi/dble(180))
+end subroutine
+
+
+!Frequency in [rad/step]
+subroutine bodymovesin(NTime, Ampl, Freq, Uscalar, alpha, Ut)
+       IMPLICIT NONE
+       real(kind=8), intent(IN) :: Ampl, Freq
+       real(kind=8), intent(IN) :: uscalar , alpha
+       integer, intent(IN) :: NTime
+       real(kind=8), dimension(2) :: u
+       real(kind=8), dimension(NTime,2), intent(OUT) :: Ut
+       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
+       integer :: i
+       u(1) = -uscalar*dcos(alpha*pi/dble(180))
+       u(2) = -uscalar*dsin(alpha*pi/dble(180))
+       do i = 1,NTime
+        Ut(i,1) = u(1)
+        Ut(i,2) = u(2)-Ampl*dsin(dble(i)*Freq)
+       end do
 end subroutine
 
 

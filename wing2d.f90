@@ -6,16 +6,16 @@
 !A circle in a _potential_ flow
 PROGRAM wing2d
       IMPLICIT NONE
-      integer, parameter :: Nelem = 129
-      integer, parameter :: NTime = 3000
+      integer, parameter :: Nelem = 9
+      integer, parameter :: NTime = 300
       integer, parameter :: NWake = (Nelem+1)/2*10
       integer :: i
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
       real(kind=8), parameter :: Chord = 1.
-      real(kind=8) :: UHoriz, uscalar = 1.
-      real(kind=8) :: alpha = 6.
+      real(kind=8) :: UHoriz, uscalar = 1., Freq = 0.1, Ampl = 0.15
+      real(kind=8) :: alpha = 4.
       real(kind=8), dimension(2) :: U
       real(kind=8), dimension(NTime,2) :: Ut
       real(kind=8) :: Thick = 0.1
@@ -34,12 +34,10 @@ PROGRAM wing2d
 !     Time step
       real(kind=8) :: DT, CalcDT
 !     The program starts here!
-      call BodyRotation(Uscalar, alpha, U)
-      Ut(:,1) = U(1)
-      Ut(:,2) = U(2)
       call GeomWing(Nelem, Xnode, Chord, Thick)
       UHoriz = Uscalar*dcos(alpha/360.D0*PI)
       DT = CalcDT(Nelem, Xnode, UHoriz)
+      call BodyMoveSin(NTime, Ampl, Freq, Uscalar, alpha, Ut)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
       do i = 1,NTime
@@ -49,9 +47,13 @@ PROGRAM wing2d
       call CalcCl(Nelem, Xnode, TEat1, NTime, DT, Ut, Phit, Chit, cl)
       call CalcCp(Nelem, Xnode, TEat1, NTime, dt, Ut, phit, chit, cp)
       do i = 1,NTime
-       open(unit=16, file='cpfile')
-       write(16,*) cp(:,i)
+       open(unit=20, file='cpfile')
+       open(unit=21, file='utime')
+       write(20,*) cp(:,i)
+       write(21,*) Ut(i,:)
       end do
+      close(unit=21)
+      close(unit=20)
       call CalcSrfVel(Nelem, Xnode, TEat1, Phit(:,1), Chit(:,1), srfvelend)
       call CalcDPhiBody(Nelem, NTime, PhiT, DPhiBody)
       open(unit=16, file='dphi')
