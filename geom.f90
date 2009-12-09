@@ -26,7 +26,7 @@ end function
 !Calculate the timestep for the wake
 double precision function CalcDT(Nelem, Xnode, UHoriz)
       IMPLICIT NONE
-      INTEGER :: Nelem
+      integer :: Nelem
       real(kind=8) :: UHoriz
       real(KIND=8), dimension(Nelem,2) :: XNODE
       real(kind=8) :: dist

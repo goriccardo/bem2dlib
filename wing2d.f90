@@ -7,15 +7,15 @@
 PROGRAM wing2d
       IMPLICIT NONE
       integer, parameter :: Nelem = 9
-      integer, parameter :: NTime = 300
-      integer, parameter :: NWake = (Nelem+1)/2*10
+      integer, parameter :: NTime = 3000
+      integer, parameter :: NWake = 1 !(Nelem+1)/2*10
       integer :: i
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
       real(kind=8), parameter :: Chord = 1., Thick = 0.1
-      real(kind=8) :: UHoriz, uscalar = 1., Freq = 0.1, Ampl = 0.15
-      real(kind=8) :: alpha = 4.
+      real(kind=8) :: UHoriz, uscalar = 1., Freq = 0.5, Ampl = 0.15
+      real(kind=8) :: alpha = 0.
       real(kind=8), dimension(2) :: U
       real(kind=8), dimension(NTime,2) :: Ut
 !     Potential and normal wash on the surface
@@ -36,15 +36,18 @@ PROGRAM wing2d
       call GeomWing(Nelem, Xnode, Chord, Thick)
       UHoriz = Uscalar*dcos(alpha/360.D0*PI)
       DT = CalcDT(Nelem, Xnode, UHoriz)
-      call BodyMoveSin(NTime, Ampl, Freq, Uscalar, alpha, Ut)
+      call BodyRotation(Uscalar, alpha, U)
+      call BodyMoveSin(NTime, Ampl, Freq, U, alpha, Ut)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
       do i = 1,NTime
-       call BCondVel(Nelem, Xnode, U, Chit(:,i))
+       call BCondVel(Nelem, Xnode, Ut(i,:), Chit(:,i))
       end do
       call SolvePhiTime(Nelem, B, C, NWake, D, NTime, Chit, Phit, DPhiW)
       call CalcCl(Nelem, Xnode, TEat1, NTime, DT, Ut, Phit, Chit, cl)
       call CalcCp(Nelem, Xnode, TEat1, NTime, dt, Ut, phit, chit, cp)
+      call CalcSrfVel(Nelem, Xnode, TEat1, Phit(:,1), Chit(:,1), srfvelend)
+      call CalcDPhiBody(Nelem, NTime, PhiT, DPhiBody)
       do i = 1,NTime
        open(unit=20, file='cpfile')
        open(unit=21, file='utime')
@@ -53,20 +56,18 @@ PROGRAM wing2d
       end do
       close(unit=21)
       close(unit=20)
-      call CalcSrfVel(Nelem, Xnode, TEat1, Phit(:,1), Chit(:,1), srfvelend)
-      call CalcDPhiBody(Nelem, NTime, PhiT, DPhiBody)
       open(unit=16, file='dphi')
       do i = 2,NTime
        write(16,*) DPhiBody(:,i), DPhiW(:,i-1)
       end do
-      close(unit=16)      
+      close(unit=16)
       call Collocation(Nelem, Xnode, Cpoint)
       open(unit=15, file='endvel')
       do i = 1,Nelem
        write(15,*) Cpoint(i,:), srfvelend(i,:)
       end do
       close(unit=15)
-      open(unit=19, file='cpoints')
+!      open(unit=19, file='cpoints')
       do i = 1,Nelem/2
        write(19,*) Cpoint(Nelem/2-i+1,:)
       end do
@@ -76,7 +77,7 @@ PROGRAM wing2d
       close(unit=19)
 !     Save results
       call SaveCL(NTime, cl)
-      call SavePhi(Nelem, NWake, PhiT)
+      call SavePhi(Nelem, NTime, PhiT)
       call SaveXWnode(NWake, XWnode)
 END PROGRAM
 
