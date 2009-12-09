@@ -86,12 +86,12 @@ end subroutine
 
 
 !Frequency in [rad/step]
-subroutine bodymovesin(NTime, Ampl, Freq, Uscalar, alpha, Ut)
+subroutine BodyMoveSin(NTime, Ampl, Freq, Uscalar, alpha, U, Ut)
        IMPLICIT NONE
        real(kind=8), intent(IN) :: Ampl, Freq
        real(kind=8), intent(IN) :: uscalar , alpha
        integer, intent(IN) :: NTime
-       real(kind=8), dimension(2) :: u
+       real(kind=8), dimension(2), intent(OUT) :: U
        real(kind=8), dimension(NTime,2), intent(OUT) :: Ut
        real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
        integer :: i
@@ -101,6 +101,27 @@ subroutine bodymovesin(NTime, Ampl, Freq, Uscalar, alpha, Ut)
         Ut(i,1) = u(1)
         Ut(i,2) = u(2)-Ampl*dsin(dble(i)*Freq)
        end do
+end subroutine
+
+
+!Ampl is the angle amplitude
+subroutine BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, U, Ut)
+       IMPLICIT NONE
+       real(kind=8), intent(IN) :: alphaAmpl, Freq
+       real(kind=8), intent(IN) :: Uscalar , alpha
+       real(kind=8) :: beta
+       integer, intent(IN) :: NTime
+       real(kind=8), dimension(2), intent(OUT) :: U
+       real(kind=8), dimension(NTime,2), intent(OUT) :: Ut
+       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
+       integer :: i
+       do i = 1,NTime
+        beta = alphaAmpl*sin(Freq*i)
+        call bodyrotation(uscalar, alpha+beta, u)
+        Ut(i,1) = u(1)
+        Ut(i,2) = u(2)
+       end do
+       call bodyrotation(uscalar, alpha, u)
 end subroutine
 
 

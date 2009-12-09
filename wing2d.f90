@@ -8,13 +8,13 @@ PROGRAM wing2d
       IMPLICIT NONE
       integer, parameter :: Nelem = 9
       integer, parameter :: NTime = 3000
-      integer, parameter :: NWake = 1 !(Nelem+1)/2*10
+      integer, parameter :: NWake = (Nelem+1)/2*10
       integer :: i
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
-      real(kind=8), parameter :: Chord = 1., Thick = 0.1
-      real(kind=8) :: UHoriz, uscalar = 1., Freq = 0.5, Ampl = 0.15
+      real(kind=8), parameter :: Chord = 1., Thick = 0.1D0
+      real(kind=8) :: UHoriz, uscalar = 1., Freq = 0.1D0, Ampl = 0.15D0, alphaAmpl = 5.D0
       real(kind=8) :: alpha = 0.
       real(kind=8), dimension(2) :: U
       real(kind=8), dimension(NTime,2) :: Ut
@@ -36,8 +36,12 @@ PROGRAM wing2d
       call GeomWing(Nelem, Xnode, Chord, Thick)
       UHoriz = Uscalar*dcos(alpha/360.D0*PI)
       DT = CalcDT(Nelem, Xnode, UHoriz)
-      call BodyRotation(Uscalar, alpha, U)
-      call BodyMoveSin(NTime, Ampl, Freq, U, alpha, Ut)
+
+!     Moving up and down...
+!      call BodyMoveSin(NTime, Ampl, Freq, Uscalar, alpha, U, Ut)
+!     Rotating
+      call BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, U, Ut)
+
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
       do i = 1,NTime

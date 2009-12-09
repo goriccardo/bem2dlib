@@ -27,10 +27,28 @@ subroutine BCondLap(Nelem, Xnode, Ampl, ChiLap)
       REAL(KIND=8), INTENT(IN) :: Ampl
       complex(kind=8), dimension(Nelem), INTENT(OUT) :: ChiLap
       real(kind=8), dimension(Nelem,2) :: n
-      integer :: I, NOE
+      integer :: I
       call normals(Nelem, Xnode, n)
       do I = 1, Nelem
-       ChiLap(I) = Ampl*n(i,2)
+       ChiLap(i) = Ampl*n(i,2)
+      end do
+end subroutine
+
+
+subroutine BCondRotLap(Nelem, Xnode, alphaAmpl, ChiLap)
+      IMPLICIT NONE
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
+      INTEGER, INTENT(IN) :: Nelem
+      REAL(KIND=8), DIMENSION(Nelem,2), INTENT(IN) :: Xnode
+      REAL(KIND=8), INTENT(IN) :: alphaAmpl
+      real(kind=8) :: alpharad
+      complex(kind=8), dimension(Nelem), INTENT(OUT) :: ChiLap
+      real(kind=8), dimension(Nelem,2) :: n
+      integer :: I
+      call normals(Nelem, Xnode, n)
+      alpharad = dble(2)*PI*alphaAmpl/dble(360)
+      do I = 1, Nelem
+       ChiLap(i) = dcmplx(alpharad*n(i,2),alpharad*n(i,1))
       end do
 end subroutine
 
@@ -76,7 +94,7 @@ SUBROUTINE SolvePhiTime(N, B, C, NWake, D, NTime, ChiTime, PhiTime, DPhiW)
       end do
       do i = 1,NTime
        ATemp = A
-       RHS = MATMUL(B,ChiTime(:,i))! + MATMUL(D, DPhiW(:,i))
+       RHS = MATMUL(B,ChiTime(:,i)) + MATMUL(D, DPhiW(:,i))
        CALL DGESV(N, 1, ATEMP, N, IPIV, RHS, N, INFO)
        IF (INFO .NE. 0) THEN
          WRITE(*,*) "ERROR IN LINEAR SYSTEM"
@@ -97,7 +115,7 @@ SUBROUTINE SolvePhiLap(N, B, C, DRS, ChiLap, PhiLap)
       integer :: I, INFO
       complex(kind=8), dimension(N,N) :: A
       complex(kind=8), dimension(N) :: RHS, IPIV
-      A = - dcmplx(C) ! - DRS
+      A = - dcmplx(C) - DRS
       do i = 1, N
        A(i,i) = A(i,i) + dcmplx(0.5,0.)
       end do

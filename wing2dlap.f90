@@ -13,7 +13,8 @@ PROGRAM wing2dlab
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
-      real(kind=8), parameter :: Chord = 1., Thick = 0.1D0, uscalar = 1., Freq = 0.1D0, Ampl = 0.15D0
+      real(kind=8), parameter :: Chord = 1., Thick = 0.1D0, uscalar = 1.
+      real(kind=8), parameter :: Freq = 0.1D0, Ampl = 0.15D0, alphaAmpl = 5.D0
       real(kind=8) :: UHoriz
       real(kind=8) :: alpha = 0.
       real(kind=8), parameter :: w = 2.*PI*Freq
@@ -30,13 +31,14 @@ PROGRAM wing2dlab
       real(kind=8) :: DT, CalcDT
 !     The program starts here!
       call GeomWing(Nelem, Xnode, Chord, Thick)
-      UHoriz = Uscalar*dcos(alpha/360.D0*PI)
+      UHoriz = Uscalar*dcos(alpha/360.D0*2*PI)
       DT = CalcDT(Nelem, Xnode, UHoriz)
       call BodyRotation(Uscalar, alpha, U)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
-      call MatDRS(Nelem, NWake, D, DT, s, DRS)
-      call BCondLap(Nelem, Xnode, Ampl, ChiLap)
+      call MatDRS(Nelem, NWake, D, s, DRS)
+      !call BCondLap(Nelem, Xnode, Ampl, ChiLap)
+      call BCondRotLap(Nelem, Xnode, alphaAmpl, ChiLap)
       call SolvePhiLap(Nelem, B, C, DRS, ChiLap, PhiLap)
       do i = 1,Nelem
        write(*,1001) cdabs(PhiLap(i))
