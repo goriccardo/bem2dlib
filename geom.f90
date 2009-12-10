@@ -79,7 +79,7 @@ subroutine bodyrotation(uscalar, alpha, u)
        IMPLICIT NONE
        real(kind=8), intent(IN) :: uscalar , alpha
        real(kind=8), dimension(2), intent(OUT) :: u
-       REAL(KIND=8), PARAMETER :: PI = 4.D0*datan(1.D0)
+       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
        u(1) = -uscalar*dcos(alpha*pi/dble(180))
        u(2) = -uscalar*dsin(alpha*pi/dble(180))
 end subroutine
@@ -116,7 +116,7 @@ subroutine BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, U, Ut)
        real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
        integer :: i
        do i = 1,NTime
-        beta = alphaAmpl*sin(Freq*i)
+        beta = alphaAmpl*dsin(Freq*dble(i))
         call bodyrotation(uscalar, alpha+beta, u)
         Ut(i,1) = u(1)
         Ut(i,2) = u(2)
