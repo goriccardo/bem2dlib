@@ -85,33 +85,27 @@ subroutine bodyrotation(uscalar, alpha, u)
 end subroutine
 
 
-!Frequency in [rad/step]
-subroutine BodyMoveSin(NTime, Ampl, Freq, Uscalar, alpha, U, Ut)
+!If clockwise is positive then rotate clockwise, else counterclockwise
+subroutine rotateVec90(clockwise, InVec, OutVec)
        IMPLICIT NONE
-       real(kind=8), intent(IN) :: Ampl, Freq
-       real(kind=8), intent(IN) :: uscalar , alpha
-       integer, intent(IN) :: NTime
-       real(kind=8), dimension(2), intent(OUT) :: U
-       real(kind=8), dimension(NTime,2), intent(OUT) :: Ut
-       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
-       integer :: i
-       u(1) = -uscalar*dcos(alpha*pi/dble(180))
-       u(2) = -uscalar*dsin(alpha*pi/dble(180))
-       do i = 1,NTime
-        Ut(i,1) = u(1)
-        Ut(i,2) = u(2)-Ampl*dsin(dble(i)*Freq)
-       end do
+       real(kind=8), dimension(2), intent(IN) :: InVec
+       real(kind=8), dimension(2), intent(OUT) :: OutVec
+       integer, intent(IN) :: clockwise
+       integer :: s
+       s = sign(1,clockwise)
+       OutVec(1) = -dble(s)*InVec(2)
+       OutVec(2) = dble(s)*InVec(1)
 end subroutine
 
 
 !Ampl is the angle amplitude
-subroutine BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, U, Ut)
+subroutine BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, Ut)
        IMPLICIT NONE
        real(kind=8), intent(IN) :: alphaAmpl, Freq
        real(kind=8), intent(IN) :: Uscalar , alpha
        real(kind=8) :: beta
        integer, intent(IN) :: NTime
-       real(kind=8), dimension(2), intent(OUT) :: U
+       real(kind=8), dimension(2) :: U
        real(kind=8), dimension(NTime,2), intent(OUT) :: Ut
        real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
        integer :: i
@@ -121,7 +115,7 @@ subroutine BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, U, Ut)
         Ut(i,1) = u(1)
         Ut(i,2) = u(2)
        end do
-       call bodyrotation(uscalar, alpha, u)
+!      call bodyrotation(uscalar, alpha, u)
 end subroutine
 
 

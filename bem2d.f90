@@ -1,7 +1,7 @@
 !Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
 !Released under BSD license, see LICENSE
 
-!Impose boundary conditions for a moving circle with u velocity
+!Impose boundary conditions for a moving body with U velocity
 !in the air frame of reference
 subroutine BCondVel(N, XNODE, U, CHI)
       IMPLICIT NONE
@@ -12,15 +12,47 @@ subroutine BCondVel(N, XNODE, U, CHI)
       real(kind=8), dimension(2) :: T
       integer :: I, NOE
       do I = 1, N
-       T = XNODE(NOE(N,I,1),:2) - XNODE(NOE(N,I,0),:2)
+       T = XNODE(NOE(N,I,1),:) - XNODE(NOE(N,I,0),:)
        T = T/SQRT(T(1)**2 + T(2)**2)
        CHI(I) = U(1)*T(2) - U(2)*T(1)
       end do
 end subroutine
 
 
+!Impose boundary conditions for vertical oscillating body
+!in the air frame of reference
+! N         # of elements
+! Uscalar   Module of Body Velocity [m/s]
+! alpha     Angle of incidence [deg°]
+! VelAmpl   Vertical Velocity Amplitude [m/s]
+! Freq      Frequency [Hz]
+! Dt        Time step size [s]
+! NTime     # time steps
+! ChiTime   Boundary Conditions Matrix
+subroutine BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, ChiTime)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, Ntime
+      real(kind=8), intent(IN) :: alpha, VelAmpl, Freq, Uscalar, DT
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      real(kind=8), dimension(Ntime,2), intent(OUT) :: Ut
+      real(kind=8), dimension(2) :: U
+      real(kind=8), dimension(Nelem,Ntime), intent(OUT) :: ChiTime
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
+!     w <- Angular Velocity [rad/s]
+      real(kind=8) :: w
+      integer :: i
+      call bodyrotation(uscalar, alpha, u)
+      w = PI/dble(180)*freq/DT ![rad/step]
+      Ut(:,1) = U(1)
+      do i = 1,NTime
+       Ut(i,2) = U(2) - VelAmpl*dsin(w*dble(i))
+       call BCondVel(Nelem, Xnode, Ut(i,:), ChiTime(:,i))
+      end do
+end subroutine
+
+
 !We assume that U Horizontal is constant
-subroutine BCondLap(Nelem, Xnode, Ampl, ChiLap)
+subroutine BCondOscilLap(Nelem, Xnode, Ampl, ChiLap)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
@@ -85,17 +117,17 @@ subroutine SolvePhiTime(N, B, C, NWake, D, NTime, ChiTime, PhiTime, DPhiW)
       real(kind=8), dimension(NWake,NTime), intent(OUT) :: DPhiW
       real(kind=8), dimension(N,NTime), intent(OUT) :: PhiTime
       integer :: I, INFO
-      real(kind=8), dimension(N,N) :: A, ATEMP
+      real(kind=8), dimension(N,N) :: A
       real(kind=8), dimension(N) :: RHS, IPIV
       DPhiW(:,:) = 0.
       A = -C
       do i = 1, N
        A(i,i) = A(i,i) + DBLE(0.5)
       end do
+      call DGETRF(N, N, A, N, IPIV, INFO)
       do i = 1,NTime
-       ATemp = A
        RHS = matmul(B,ChiTime(:,i)) + matmul(D, DPhiW(:,i))
-       call DGESV(N, 1, ATEMP, N, IPIV, RHS, N, INFO)
+       call DGETRS('N', N, 1, A, N, IPIV, RHS, N, INFO)
        if (INFO .NE. 0) then
          write(*,*) "ERROR IN LINEAR SYSTEM"
        end if

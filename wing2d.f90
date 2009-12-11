@@ -13,10 +13,10 @@ PROGRAM wing2d
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
-      real(kind=8), parameter :: Chord = 1., Thick = 0.1D0
-      real(kind=8) :: UHoriz, uscalar = 1., Freq = 0.1D0, Ampl = 0.15D0, alphaAmpl = 5.D0
+      real(kind=8), parameter :: Chord = 1., Thick = 0.1D0, Freq = 0.1D0, VelAmpl = 0.15D0
+      real(kind=8) :: UHoriz, uscalar = 1.,  alphaAmpl = 5.D0
       real(kind=8) :: alpha = 0.
-      real(kind=8), dimension(2) :: U
+!     real(kind=8), dimension(2) :: U
       real(kind=8), dimension(NTime,2) :: Ut
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
@@ -36,17 +36,12 @@ PROGRAM wing2d
       call GeomWing(Nelem, Xnode, Chord, Thick)
       UHoriz = Uscalar*dcos(alpha/360.D0*PI)
       DT = CalcDT(Nelem, Xnode, UHoriz)
-
 !     Moving up and down...
-!      call BodyMoveSin(NTime, Ampl, Freq, Uscalar, alpha, U, Ut)
+      call BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, Chit)
 !     Rotating
-      call BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, U, Ut)
-
+!      call BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, Ut)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
-      do i = 1,NTime
-       call BCondVel(Nelem, Xnode, Ut(i,:), Chit(:,i))
-      end do
       call SolvePhiTime(Nelem, B, C, NWake, D, NTime, Chit, Phit, DPhiW)
       call CalcCl(Nelem, Xnode, TEat1, NTime, DT, Ut, Phit, Chit, cl)
       call CalcCp(Nelem, Xnode, TEat1, NTime, dt, Ut, phit, chit, cp)

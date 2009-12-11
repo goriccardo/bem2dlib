@@ -37,18 +37,22 @@ END SUBROUTINE
 !Super cool matrix D*R*S. D is aka F
 !R is the retard (delays) matrix
 !S is the stupid matrix
-!DRS is a 'temple' matrix (name by Robin & Martin)
-subroutine MatDRS(Nelem, NWake, D, s, DRS)
+!DRS is a 'temple' matrix [name by Robin & Martin (aka Riccardo)]
+subroutine MatDRS(Nelem, NWake, D, s, DT, DRS)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem, NWake
       real(kind=8), dimension(Nelem,NWake), intent(IN) :: D
+      real(kind=8), intent(IN) :: DT
       complex(kind=8), intent(IN) :: s
+      complex(kind=8) :: ss
       complex(kind=8), dimension(NWake) :: Rvec
       complex(kind=8), dimension(Nelem,Nelem), intent(OUT) :: DRS
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       integer :: i
       DRS(:,:) = 0.
+      ss = PI/dble(180)*s/DT
       do i = 1,NWake
-       Rvec(i) = cdexp(-s*dble(i))
+       Rvec(i) = cdexp(-ss*dble(i))
       ! write(*,*) aimag(Rvec(i))
       end do
       do i = 1,Nelem

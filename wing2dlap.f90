@@ -19,7 +19,6 @@ PROGRAM wing2dlab
       real(kind=8) :: alpha = 0.
       real(kind=8), parameter :: w = 2.*PI*Freq
       complex(kind=8), parameter :: s = dcmplx(0.,Freq)
-      real(kind=8), dimension(2) :: U
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
       real(kind=8), dimension(NWake,2) :: XWnode
@@ -33,12 +32,11 @@ PROGRAM wing2dlab
       call GeomWing(Nelem, Xnode, Chord, Thick)
       UHoriz = Uscalar*dcos(alpha/360.D0*2*PI)
       DT = CalcDT(Nelem, Xnode, UHoriz)
-      call BodyRotation(Uscalar, alpha, U)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
-      call MatDRS(Nelem, NWake, D, s, DRS)
-      !call BCondLap(Nelem, Xnode, Ampl, ChiLap)
-      call BCondRotLap(Nelem, Xnode, alphaAmpl, ChiLap)
+      call MatDRS(Nelem, NWake, D, s, DT, DRS)
+      call BCondOscilLap(Nelem, Xnode, Ampl, ChiLap)
+      !call BCondRotLap(Nelem, Xnode, alphaAmpl, ChiLap)
       call SolvePhiLap(Nelem, B, C, DRS, ChiLap, PhiLap)
       do i = 1,Nelem
        write(*,1001) cdabs(PhiLap(i))
