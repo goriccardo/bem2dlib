@@ -16,7 +16,7 @@ PROGRAM wing2d
       real(kind=8), parameter :: Chord = 1., Thick = 0.1D0, Freq = 0.1D0, VelAmpl = 0.15D0
       real(kind=8) :: UHoriz, uscalar = 1.,  alphaAmpl = 5.D0
       real(kind=8) :: alpha = 0.
-!     real(kind=8), dimension(2) :: U
+      real(kind=8), dimension(2) :: Xo = (/-0.5,0./)
       real(kind=8), dimension(NTime,2) :: Ut
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
@@ -37,9 +37,9 @@ PROGRAM wing2d
       UHoriz = Uscalar*dcos(alpha/360.D0*PI)
       DT = CalcDT(Nelem, Xnode, UHoriz)
 !     Moving up and down...
-      call BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, Chit)
+!      call BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, Chit)
 !     Rotating
-!      call BodyRotateSin(NTime, Uscalar, alpha, alphaAmpl, Freq, Ut)
+      call BCondRot(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, DT, Ntime, Ut, ChiT)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
       call SolvePhiTime(Nelem, B, C, NWake, D, NTime, Chit, Phit, DPhiW)

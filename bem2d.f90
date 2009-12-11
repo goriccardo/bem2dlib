@@ -29,24 +29,28 @@ end subroutine
 ! alphaAmpl Amplitude
 ! Freq      Frequency [rad/step]
 ! ChiTime   Boundary Conditions Matrix
-subroutine BCondRot(Nelem, Xnode, Xo, Uo, alpha, alphaAmpl, Freq, DT, Ntime, Ut, ChiTime)
+subroutine BCondRot(Nelem, Xnode, Xo, UScalar, alpha, alphaAmpl, Freq, DT, Ntime, Ut, ChiTime)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem, Ntime
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
-      real(kind=8), intent(IN) :: alpha, alphaAmpl, freq
-      real(kind=8), dimension(2), intent(IN) :: Xo, Uo
+      real(kind=8), intent(IN) :: alpha, alphaAmpl, freq, DT, UScalar
+      real(kind=8), dimension(2), intent(IN) :: Xo
       real(kind=8), dimension(Nelem,Ntime), intent(OUT) :: ChiTime
-      real(kind=8), dimension(2) :: Ur, R, T
+      real(kind=8), dimension(Ntime,2), intent(OUT) :: Ut
+      real(kind=8), dimension(2) :: U, Ur, R, T, w
       real(kind=8), dimension(Nelem,2) :: n, Cpoint
-      integer :: i, j, NOE
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
+      integer :: i, j
       call normals(Nelem, Xnode, n)
       call collocation(Nelem, Xnode, Cpoint)
+      call bodyrotation(uscalar, alpha, u)
+      w = PI/dble(180)*freq/DT ![rad/step]
       do i = 1,NTime
        do j = 1,Nelem
 !       Constant component
         R = (Cpoint(j,:) - Xo)
         call rotateVec90(1,R,T)
-        Ur = Uo + T*freq*dsin(freq*i)
+        Ur = U + T*freq*dsin(w*i)
         ChiTime(i,j) = dot_product(Ur, n(j,:))
        end do
       end do
