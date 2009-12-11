@@ -19,6 +19,40 @@ subroutine BCondVel(N, XNODE, U, CHI)
 end subroutine
 
 
+!Impose boundary conditions for a roto-translating body
+!in the air frame of reference
+! N         # of elements
+! Xnode     Node vector
+! Xo        Rotation center
+! Uo        Body Speed Vector
+! alpha     Angle of incidence
+! alphaAmpl Amplitude
+! Freq      Frequency [rad/step]
+! ChiTime   Boundary Conditions Matrix
+subroutine BCondRot(Nelem, Xnode, Xo, Uo, alpha, alphaAmpl, Freq, DT, Ntime, Ut, ChiTime)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, Ntime
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      real(kind=8), intent(IN) :: alpha, alphaAmpl, freq
+      real(kind=8), dimension(2), intent(IN) :: Xo, Uo
+      real(kind=8), dimension(Nelem,Ntime), intent(OUT) :: ChiTime
+      real(kind=8), dimension(2) :: Ur, R, T
+      real(kind=8), dimension(Nelem,2) :: n, Cpoint
+      integer :: i, j, NOE
+      call normals(Nelem, Xnode, n)
+      call collocation(Nelem, Xnode, Cpoint)
+      do i = 1,NTime
+       do j = 1,Nelem
+!       Constant component
+        R = (Cpoint(j,:) - Xo)
+        call rotateVec90(1,R,T)
+        Ur = Uo + T*freq*dsin(freq*i)
+        ChiTime(i,j) = dot_product(Ur, n(j,:))
+       end do
+      end do
+end subroutine
+
+
 !Impose boundary conditions for vertical oscillating body
 !in the air frame of reference
 ! N         # of elements
