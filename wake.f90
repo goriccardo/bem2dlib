@@ -50,7 +50,7 @@ subroutine MatDRS(Nelem, NWake, D, s, DT, DRS)
       real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       integer :: i
       DRS(:,:) = 0.
-      ss = PI/dble(180)*s/DT
+      ss = PI*s*DT
       do i = 1,NWake
        Rvec(i) = cdexp(-ss*dble(i))
       ! write(*,*) aimag(Rvec(i))

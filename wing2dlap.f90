@@ -13,11 +13,11 @@ PROGRAM wing2dlab
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
-      real(kind=8), parameter :: Chord = 1., Thick = 0.1D0, uscalar = 1.
-      real(kind=8), parameter :: Freq = 0.1D0, Ampl = 0.15D0, alphaAmpl = 5.D0
+      real(kind=8), parameter :: Chord = 1.D0, Thick = 0.1D0, uscalar = 1.
+      real(kind=8), parameter :: Freq = 0.1D0, VelAmpl = 0.15D0, alphaAmpl = 5.D0
       real(kind=8) :: UHoriz
-      real(kind=8) :: alpha = 0.
-      real(kind=8), parameter :: w = 2.*PI*Freq
+      real(kind=8) :: alpha = 5.D0
+      real(kind=8), dimension(2) :: Xo = (/0.25,0./)
       complex(kind=8), parameter :: s = dcmplx(0.,Freq)
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
@@ -30,13 +30,14 @@ PROGRAM wing2dlab
       real(kind=8) :: DT, CalcDT
 !     The program starts here!
       call GeomWing(Nelem, Xnode, Chord, Thick)
-      UHoriz = Uscalar*dcos(alpha/360.D0*2*PI)
+      UHoriz = Uscalar*dcos(alpha*PI/dble(180))
       DT = CalcDT(Nelem, Xnode, UHoriz)
+      write(*,*) "Timestep = ",DT
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
       call MatDRS(Nelem, NWake, D, s, DT, DRS)
-      call BCondOscilLap(Nelem, Xnode, Ampl, ChiLap)
-      !call BCondRotLap(Nelem, Xnode, alphaAmpl, ChiLap)
+!      call BCondOscilLap(Nelem, Xnode, alpha, VelAmpl, ChiLap)
+      call BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, DT, ChiLap)
       call SolvePhiLap(Nelem, B, C, DRS, ChiLap, PhiLap)
       do i = 1,Nelem
        write(*,1001) cdabs(PhiLap(i))

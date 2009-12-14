@@ -13,10 +13,10 @@ PROGRAM wing2d
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
-      real(kind=8), parameter :: Chord = 1., Thick = 0.1D0, Freq = 0.1D0, VelAmpl = 0.15D0
+      real(kind=8), parameter :: Chord = 1.D0, Thick = 0.1D0, Freq = 0.1D0, VelAmpl = 0.15D0
       real(kind=8) :: UHoriz, uscalar = 1.,  alphaAmpl = 5.D0
-      real(kind=8) :: alpha = 0.
-      real(kind=8), dimension(2) :: Xo = (/-0.5,0./)
+      real(kind=8) :: alpha = 5.D0
+      real(kind=8), dimension(2) :: Xo = (/0.25,0./)
       real(kind=8), dimension(NTime,2) :: Ut
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
@@ -36,6 +36,8 @@ PROGRAM wing2d
       call GeomWing(Nelem, Xnode, Chord, Thick)
       UHoriz = Uscalar*dcos(alpha/360.D0*PI)
       DT = CalcDT(Nelem, Xnode, UHoriz)
+      write(*,*) "Timestep = ",DT
+      write(*,*) "Total time = ", DT*NTime
 !     Moving up and down...
 !      call BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, Chit)
 !     Rotating
@@ -50,9 +52,12 @@ PROGRAM wing2d
       do i = 1,NTime
        open(unit=20, file='cpfile')
        open(unit=21, file='utime')
+       open(unit=22, file='chisurf')
        write(20,*) cp(:,i)
        write(21,*) Ut(i,:)
+       write(22,*) Chit(:,i)
       end do
+      close(unit=22)
       close(unit=21)
       close(unit=20)
       open(unit=16, file='dphi')

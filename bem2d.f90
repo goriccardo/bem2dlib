@@ -3,18 +3,17 @@
 
 !Impose boundary conditions for a moving body with U velocity
 !in the air frame of reference
-subroutine BCondVel(N, XNODE, U, CHI)
+subroutine BCondVel(Nelem, Xnode, U, Chi)
       IMPLICIT NONE
-      integer, intent(IN) :: N
-      real(kind=8), dimension(N,2), intent(IN) :: XNODE
+      integer, intent(IN) :: Nelem
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       real(kind=8), dimension(2), intent(IN) :: U
-      real(kind=8), dimension(N), intent(OUT) :: CHI
-      real(kind=8), dimension(2) :: T
-      integer :: I, NOE
-      do I = 1, N
-       T = XNODE(NOE(N,I,1),:) - XNODE(NOE(N,I,0),:)
-       T = T/SQRT(T(1)**2 + T(2)**2)
-       CHI(I) = U(1)*T(2) - U(2)*T(1)
+      real(kind=8), dimension(Nelem), intent(OUT) :: Chi
+      real(kind=8), dimension(Nelem,2) :: n
+      integer :: i
+      call normals(Nelem,XNode,n)
+      do i = 1, Nelem
+       Chi(i) = dot_product(U,n(i,:))
       end do
 end subroutine
 
@@ -37,22 +36,50 @@ subroutine BCondRot(Nelem, Xnode, Xo, UScalar, alpha, alphaAmpl, Freq, DT, Ntime
       real(kind=8), dimension(2), intent(IN) :: Xo
       real(kind=8), dimension(Nelem,Ntime), intent(OUT) :: ChiTime
       real(kind=8), dimension(Ntime,2), intent(OUT) :: Ut
-      real(kind=8), dimension(2) :: U, Ur, R, T, w
+      real(kind=8), dimension(2) :: U, Ur, R, T
       real(kind=8), dimension(Nelem,2) :: n, Cpoint
+      real(kind=8) :: alphat, ws, wt
       real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       integer :: i, j
       call normals(Nelem, Xnode, n)
       call collocation(Nelem, Xnode, Cpoint)
-      call bodyrotation(uscalar, alpha, u)
-      w = PI/dble(180)*freq/DT ![rad/step]
+      ws = PI*freq*DT ![rad/step]
+      wt = PI*freq    ![rad/s]
+      Ut(:,1) = U(1)
+      Ut(:,2) = U(2)
       do i = 1,NTime
+       alphat = alpha + alphaAmpl*dsin(ws*i)
+       call bodyrotation(uscalar, alphat, U)
        do j = 1,Nelem
 !       Constant component
         R = (Cpoint(j,:) - Xo)
         call rotateVec90(1,R,T)
-        Ur = U + T*freq*dsin(w*i)
-        ChiTime(i,j) = dot_product(Ur, n(j,:))
+        Ur = U + alphaAmpl*PI/dble(180)*T*wt*dcos(ws*i)
+        ChiTime(j,i) = dot_product(Ur, n(j,:))
        end do
+      end do
+end subroutine
+
+
+subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, DT, ChiLap)
+      IMPLICIT NONE
+      real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
+      integer, intent(IN) :: Nelem
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      real(kind=8), dimension(2), intent(IN) :: Xo
+      real(kind=8), intent(IN) :: alphaAmpl, Uscalar, DT, alpha
+      real(kind=8) :: alpharad, wt, vxampl, vyampl, R, dist
+      complex(kind=8), dimension(Nelem), intent(OUT) :: ChiLap
+      real(kind=8), dimension(Nelem,2) :: n, CPoint
+      integer :: I
+      call normals(Nelem, Xnode, n)
+      call collocation(Nelem, Xnode, Cpoint)
+      wt = PI*freq    ![rad/s]
+      do I = 1, Nelem
+       R = dist(Cpoint(i,:), Xo)
+       vxampl = Uscalar*dcos(PI/dble(180)*alphaAmpl)
+       vyampl = Uscalar*dsin(PI/dble(180)*alphaAmpl)
+       ChiLap(i) = dcmplx(wt*R + vxampl*n(i,1) + vyampl*n(i,2), 0.)
       end do
 end subroutine
 
@@ -73,52 +100,42 @@ subroutine BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut
       real(kind=8), intent(IN) :: alpha, VelAmpl, Freq, Uscalar, DT
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       real(kind=8), dimension(Ntime,2), intent(OUT) :: Ut
-      real(kind=8), dimension(2) :: U
+      real(kind=8), dimension(2) :: U, Utmp
       real(kind=8), dimension(Nelem,Ntime), intent(OUT) :: ChiTime
       real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
-!     w <- Angular Velocity [rad/s]
-      real(kind=8) :: w
+!     w <- Angular Velocity [rad/step]
+      real(kind=8) :: w, alpharad
       integer :: i
-      call bodyrotation(uscalar, alpha, u)
-      w = PI/dble(180)*freq/DT ![rad/step]
-      Ut(:,1) = U(1)
+      alpharad = alpha*PI/dble(180)
+      call bodyrotation(uscalar, alpha, U)
+      w = PI*freq*DT ![rad/step]
+      Utmp(1) = dsqrt(U(1)**2+U(2)**2)
       do i = 1,NTime
-       Ut(i,2) = U(2) - VelAmpl*dsin(w*dble(i))
+       Utmp(2) = -VelAmpl*dsin(w*dble(i))
+       Ut(i,1) = Utmp(1)*dcos(alpharad) + Utmp(2)*dsin(alpharad)
+       Ut(i,2) =-Utmp(1)*dsin(alpharad) + Utmp(2)*dcos(alpharad)
        call BCondVel(Nelem, Xnode, Ut(i,:), ChiTime(:,i))
       end do
 end subroutine
 
 
 !We assume that U Horizontal is constant
-subroutine BCondOscilLap(Nelem, Xnode, Ampl, ChiLap)
+subroutine BCondOscilLap(Nelem, Xnode, alpha, VelAmpl, ChiLap)
       IMPLICIT NONE
+      real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       integer, intent(IN) :: Nelem
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
-      real(kind=8), intent(IN) :: Ampl
+      real(kind=8), intent(IN) :: VelAmpl, alpha
       complex(kind=8), dimension(Nelem), intent(OUT) :: ChiLap
+      real(kind=8) :: nlocy
       real(kind=8), dimension(Nelem,2) :: n
-      integer :: I
-      call normals(Nelem, Xnode, n)
-      do I = 1, Nelem
-       ChiLap(i) = Ampl*n(i,2)
-      end do
-end subroutine
-
-
-subroutine BCondRotLap(Nelem, Xnode, alphaAmpl, ChiLap)
-      IMPLICIT NONE
-      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
-      integer, intent(IN) :: Nelem
-      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
-      real(kind=8), intent(IN) :: alphaAmpl
       real(kind=8) :: alpharad
-      complex(kind=8), dimension(Nelem), intent(OUT) :: ChiLap
-      real(kind=8), dimension(Nelem,2) :: n
       integer :: I
       call normals(Nelem, Xnode, n)
-      alpharad = dble(2)*PI*alphaAmpl/dble(360)
+      alpharad = alpha*PI/dble(180)
       do I = 1, Nelem
-       ChiLap(i) = dcmplx(alpharad*n(i,2),alpharad*n(i,1))
+       nlocy = n(i,2)*dcos(alpharad) + n(i,1)*dsin(alpharad)
+       ChiLap(i) = dcmplx(VelAmpl*nlocy)
       end do
 end subroutine
 
