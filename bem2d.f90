@@ -61,7 +61,7 @@ subroutine BCondRot(Nelem, Xnode, Xo, UScalar, alpha, alphaAmpl, Freq, DT, Ntime
 end subroutine
 
 
-subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, DT, ChiLap)
+subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, DT, NFreq, s, ChiLap)
       IMPLICIT NONE
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       integer, intent(IN) :: Nelem
@@ -69,17 +69,22 @@ subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, DT, ChiLap)
       real(kind=8), dimension(2), intent(IN) :: Xo
       real(kind=8), intent(IN) :: alphaAmpl, Uscalar, DT, alpha
       real(kind=8) :: alpharad, wt, vxampl, vyampl, R, dist
-      complex(kind=8), dimension(Nelem), intent(OUT) :: ChiLap
+      integer, intent(IN) :: NFreq
+      complex(kind=8), dimension(Nfreq), intent(OUT) :: s
+      complex(kind=8), dimension(Nelem,Nfreq), intent(OUT) :: ChiLap
       real(kind=8), dimension(Nelem,2) :: n, CPoint
       integer :: I
       call normals(Nelem, Xnode, n)
       call collocation(Nelem, Xnode, Cpoint)
-      wt = PI*freq    ![rad/s]
+!     Zeroth freq
+      
+      
+      wt = PI !*freq    ![rad/s]
       do I = 1, Nelem
        R = dist(Cpoint(i,:), Xo)
        vxampl = Uscalar*dcos(PI/dble(180)*alphaAmpl)
        vyampl = Uscalar*dsin(PI/dble(180)*alphaAmpl)
-       ChiLap(i) = dcmplx(wt*R + vxampl*n(i,1) + vyampl*n(i,2), 0.)
+       ChiLap(i,1) = dcmplx(wt*R + vxampl*n(i,1) + vyampl*n(i,2), 0.)
       end do
 end subroutine
 
@@ -119,23 +124,31 @@ subroutine BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut
 end subroutine
 
 
-!We assume that U Horizontal is constant
-subroutine BCondOscilLap(Nelem, Xnode, alpha, VelAmpl, ChiLap)
+subroutine BCondOscilLap(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, NFreq, s, ChiLap)
       IMPLICIT NONE
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       integer, intent(IN) :: Nelem
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
-      real(kind=8), intent(IN) :: VelAmpl, alpha
-      complex(kind=8), dimension(Nelem), intent(OUT) :: ChiLap
-      real(kind=8) :: nlocy
+      real(kind=8), intent(IN) :: VelAmpl, alpha, Freq, Uscalar
+      integer(kind=8), intent(IN) :: Nfreq
+      complex(kind=8), dimension(Nfreq), intent(OUT) :: s
+      complex(kind=8), dimension(Nelem,Nfreq), intent(OUT) :: ChiLap
       real(kind=8), dimension(Nelem,2) :: n
       real(kind=8) :: alpharad
       integer :: I
+      if (Nfreq .ne. 2) then
+        write(*,*) "WARNING, BCondOscilLap needs Nfreq == 2"
+        s(:) = dcmplx(0)
+      end if
+      do i =1, 2
+       s(i) = dble(i-1)*freq
+      end do
+      ChiLap(:,:) = dcmplx(0)
       call normals(Nelem, Xnode, n)
       alpharad = alpha*PI/dble(180)
       do I = 1, Nelem
-       nlocy = n(i,2)*dcos(alpharad) + n(i,1)*dsin(alpharad)
-       ChiLap(i) = dcmplx(VelAmpl*nlocy)
+       ChiLap(i,1) = dcmplx(UScalar*(n(i,1)*dcos(alpharad) + n(i,2)*dsin(alpharad)))
+       ChiLap(i,2) = dcmplx(VelAmpl*(n(i,2)*dcos(alpharad) + n(i,1)*dsin(alpharad)))
       end do
 end subroutine
 
