@@ -79,30 +79,35 @@ subroutine BCondRot(Nelem, Xnode, Xo, UScalar, alpha, alphaAmpl, Freq, DT, Ntime
 end subroutine
 
 
-subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, DT, NFreq, s, ChiLap)
+subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, DT, NFreq, s, ChiLap)
       IMPLICIT NONE
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       integer, intent(IN) :: Nelem
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       real(kind=8), dimension(2), intent(IN) :: Xo
       real(kind=8), intent(IN) :: alphaAmpl, Uscalar, DT, alpha
-      real(kind=8) :: alpharad, wt, vxampl, vyampl, R, dist
+      real(kind=8) :: alpharad, wt, vxampl, vyampl, R, dist, Freq
       integer, intent(IN) :: NFreq
       complex(kind=8), dimension(Nfreq), intent(OUT) :: s
       complex(kind=8), dimension(Nelem,Nfreq), intent(OUT) :: ChiLap
       real(kind=8), dimension(Nelem,2) :: n, CPoint
       integer :: I
+      if (Nfreq .ne. 3) then
+        write(*,*) "WARNING, BCondRotLap needs Nfreq == 3"
+        s(:) = dcmplx(0)
+        ChiLap(:,:) = 0.
+        return
+      end if
       call normals(Nelem, Xnode, n)
       call collocation(Nelem, Xnode, Cpoint)
-!     Zeroth freq
-      
-      
-      wt = PI !*freq    ![rad/s]
+      wt = dble(2)*PI*freq    ![rad/s]
       do I = 1, Nelem
        R = dist(Cpoint(i,:), Xo)
-       vxampl = Uscalar*dcos(PI/dble(180)*alphaAmpl)
-       vyampl = Uscalar*dsin(PI/dble(180)*alphaAmpl)
-       ChiLap(i,1) = dcmplx(wt*R + vxampl*n(i,1) + vyampl*n(i,2), 0.)
+       vxampl = 0.
+       vyampl = 0.
+       ChiLap(i,1) = 0.
+       ChiLap(i,2) = 0.
+       ChiLap(i,3) = 0.
       end do
 end subroutine
 

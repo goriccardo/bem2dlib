@@ -7,7 +7,7 @@
 PROGRAM wing2d
       IMPLICIT NONE
       integer, parameter :: Nelem = 9
-      integer, parameter :: NTime = 3000
+      integer, parameter :: NTime = 900
       integer, parameter :: NWake = (Nelem+1)/2*10
       integer :: i
 !     Vector of nodes global coordinates (x,y)

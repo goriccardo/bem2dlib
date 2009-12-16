@@ -34,15 +34,20 @@ PROGRAM wing2dlap
       DT = CalcDT(Nelem, Xnode, UHoriz)
       write(*,*) "Timestep = ",DT
       call BCondOscilLap(Nelem, Xnode, uscalar, alpha, VelAmpl, freq, NFreq, s, ChiLap)
-!      call BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, DT, NFreq, s, ChiLap)
+!      call BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, freq, DT, NFreq, s, ChiLap)
 !       do i = 1,Nelem
 !        write(*,1001) ChiLap(i,:)
 !       end do
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
       call SolvePhiLap(Nelem, B, C, Nwake, D, Nfreq, s, DT, ChiLap, PhiLap)
+      open(unit=30, file='phisurflap')
+      open(unit=31, file='chisurflap')
       do i = 1,Nelem
-       write(*,1001) PhiLap(i,:), cdabs(PhiLap(i,:))
+       write(30,1001) PhiLap(i,:)
+       write(31,1001) ChiLap(i,:)
       end do
- 1001 FORMAT('',100(F15.6))
+      close(unit=30)
+      close(unit=31)
+ 1001 FORMAT('',100(F15.8))
 END PROGRAM
