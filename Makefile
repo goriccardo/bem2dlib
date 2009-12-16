@@ -3,7 +3,7 @@ LIBSRCS = pressure.f90 geom.f90 fieldgrid.f90 wake.f90 velocity.f90 geomwing.f90
 
 SRCS = $(LIBSRCS) circle2d.f90 wing2d.f90
 
-OBJS = pressure.o geom.o fieldgrid.o wake.o velocity.o integrals.o bem2d.o boundaryc.f90
+OBJS = pressure.o geom.o fieldgrid.o wake.o velocity.o integrals.o bem2d.o boundaryc.o
 
 COBJS = $(OBJS) circle2d.o geomcircle.o
 WOBJS = $(OBJS) wing2d.o geomwing.o

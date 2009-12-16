@@ -80,14 +80,14 @@ subroutine BCondRot(Nelem, Xnode, Xo, UScalar, alpha, alphaAmpl, Freq, DT, Ntime
 end subroutine
 
 
-subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, DT, NFreq, s, ChiLap)
+subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, NFreq, s, ChiLap)
       IMPLICIT NONE
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       integer, intent(IN) :: Nelem
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       real(kind=8), dimension(2), intent(IN) :: Xo
-      real(kind=8), intent(IN) :: alphaAmpl, Uscalar, DT, alpha
-      real(kind=8) :: alpharad, wa, alphaAmplRad, cospart, sinpart, dist, Freq
+      real(kind=8), intent(IN) :: alphaAmpl, Uscalar, alpha
+      real(kind=8) :: alpharad, wa, alphaAmplRad, cospart, sinpart, Freq
       real(kind=8), dimension(2) :: R
       integer, intent(IN) :: NFreq
       complex(kind=8), dimension(Nfreq), intent(OUT) :: s
