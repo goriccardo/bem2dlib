@@ -6,7 +6,6 @@
 !A circle in a _potential_ flow
 PROGRAM wing2dlap
       IMPLICIT NONE
-      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       integer, parameter :: Nelem = 9
       integer, parameter :: Nfreq = 2
       integer, parameter :: NWake = (Nelem+1)/2*10
@@ -14,8 +13,8 @@ PROGRAM wing2dlap
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
-      real(kind=8), parameter :: Chord = 1.D0, Thick = 0.1D0, uscalar = 1.
-      real(kind=8), parameter :: Freq = 0.1D0, VelAmpl = 0.15D0, alphaAmpl = 5.D0
+      real(kind=8), parameter :: Chord = 1.D0, Thick = 0.1D0, uscalar = 1.D0
+      real(kind=8), parameter :: Freq = 0.05D0, VelAmpl = 0.1D0, alphaAmpl = 5.D0
       real(kind=8) :: UHoriz
       real(kind=8) :: alpha = 5.D0
       real(kind=8), dimension(2) :: Xo = (/0.25,0./)
@@ -24,11 +23,11 @@ PROGRAM wing2dlap
       real(kind=8), dimension(Nelem,Nelem) :: B, C
       real(kind=8), dimension(NWake,2) :: XWnode
       complex(kind=8), dimension(Nelem,Nfreq) :: ChiLap, PhiLap
-      complex(kind=8), dimension(Nelem,Nelem) :: DRS
 !     real(kind=8), dimension(Nelem/2, NTime) :: DPhiBody
       real(kind=8), dimension(Nelem, NWake) :: D
 !     Time step
       real(kind=8) :: DT, CalcDT
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
 !     The program starts here!
       call GeomWing(Nelem, Xnode, Chord, Thick)
       UHoriz = Uscalar*dcos(alpha*PI/dble(180))
@@ -36,14 +35,14 @@ PROGRAM wing2dlap
       write(*,*) "Timestep = ",DT
       call BCondOscilLap(Nelem, Xnode, uscalar, alpha, VelAmpl, freq, NFreq, s, ChiLap)
 !      call BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, DT, NFreq, s, ChiLap)
-      do i = 1,Nelem
-        write(*,1001) cdabs(ChiLap(i,:))
-      end do
-      return
+!       do i = 1,Nelem
+!        write(*,1001) ChiLap(i,:)
+!       end do
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
-      call MatDRS(Nelem, NWake, D, s, DT, DRS)
-      call SolvePhiLap(Nelem, B, C, DRS, ChiLap, PhiLap)
-
+      call SolvePhiLap(Nelem, B, C, Nwake, D, Nfreq, s, DT, ChiLap, PhiLap)
+      do i = 1,Nelem
+       write(*,1001) PhiLap(i,:), cdabs(PhiLap(i,:))
+      end do
  1001 FORMAT('',100(F15.6))
 END PROGRAM
