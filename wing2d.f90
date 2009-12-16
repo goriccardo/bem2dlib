@@ -14,7 +14,7 @@ PROGRAM wing2d
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
       real(kind=8), parameter :: Chord = 1.D0, Thick = 0.1D0, uscalar = 1.D0
-      real(kind=8), parameter :: Freq = 0.05D0, VelAmpl = 0.1D0, alphaAmpl = 5.D0
+      real(kind=8), parameter :: Freq = 0.05D0, VelAmpl = 0.1D0, alphaAmpl = 10.D0
       real(kind=8) :: UHoriz
       real(kind=8) :: alpha = 5.D0
       real(kind=8), dimension(2) :: Xo = (/0.25,0./)
@@ -35,16 +35,16 @@ PROGRAM wing2d
       real(kind=8) :: DT, CalcDT
 !     The program starts here!
       call GeomWing(Nelem, Xnode, Chord, Thick)
-      UHoriz = Uscalar*dcos(alpha/360.D0*PI)
+      UHoriz = Uscalar*dcos(alpha*PI/dble(180))
       DT = CalcDT(Nelem, Xnode, UHoriz)
       write(*,*) "Timestep = ",DT
       write(*,*) "Total time = ", DT*NTime
 !     Going straight
 !      call BCondStraight(Nelem, Xnode, Uscalar, alpha, Ntime, Ut, Chit)
 !     Moving up and down...
-      call BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, Chit)
+!      call BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, Chit)
 !     Rotating
-!      call BCondRot(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, DT, Ntime, Ut, ChiT)
+      call BCondRot(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, DT, Ntime, Ut, ChiT)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
       call SolvePhiTime(Nelem, B, C, NWake, D, NTime, Chit, Phit, DPhiW)
