@@ -101,8 +101,8 @@ subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, NFreq,
         return
       end if
       s(1) = dcmplx(0)
-      s(2) = dcmplx(freq)
-      s(3) = dcmplx(freq*dble(2))
+      s(2) = dcmplx(0,freq)
+      s(3) = dcmplx(0,freq*dble(2))
       call normals(Nelem, Xnode, n)
       call collocation(Nelem, Xnode, Cpoint)
       alphaRad = alpha*PI/dble(180)
@@ -113,7 +113,6 @@ subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, NFreq,
        ChiLap(i,1) = -Uscalar*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2))
        cospart = alphaAmplRad*wa*(R(1)*n(i,2)-R(2)*n(i,1))
        sinpart = -Uscalar*alphaAmplRad*(-dsin(alpharad)*n(i,1)+dcos(alpharad)*n(i,2))
-       write(*,*) cospart,sinpart
        ChiLap(i,2) = dcmplx(sinpart,cospart)
        ChiLap(i,1) = ChiLap(i,1) + 25D-2*Uscalar*alphaAmplRad**2*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2))
        ChiLap(i,3) = dcmplx(0, -25D-2*Uscalar*alphaAmplRad**2*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2)))

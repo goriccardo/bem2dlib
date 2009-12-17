@@ -6,7 +6,7 @@
 !A circle in a _potential_ flow
 PROGRAM wing2dlap
       IMPLICIT NONE
-      integer, parameter :: Nelem = 9
+      integer, parameter :: Nelem = 119
       integer, parameter :: Nfreq = 3
       integer, parameter :: NWake = (Nelem+1)/2*10
       integer :: i
