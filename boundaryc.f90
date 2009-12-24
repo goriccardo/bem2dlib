@@ -80,7 +80,7 @@ subroutine BCondRot(Nelem, Xnode, Xo, UScalar, alpha, alphaAmpl, Freq, DT, Ntime
 end subroutine
 
 
-subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, NFreq, s, ChiLap)
+subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, NFreq, s, Us, ChiLap)
       IMPLICIT NONE
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       integer, intent(IN) :: Nelem
@@ -88,9 +88,10 @@ subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, NFreq,
       real(kind=8), dimension(2), intent(IN) :: Xo
       real(kind=8), intent(IN) :: alphaAmpl, Uscalar, alpha
       real(kind=8) :: alpharad, wa, alphaAmplRad, cospart, sinpart, Freq
-      real(kind=8), dimension(2) :: R
+      real(kind=8), dimension(2) :: R,U
       integer, intent(IN) :: NFreq
       complex(kind=8), dimension(Nfreq), intent(OUT) :: s
+      complex(kind=8), dimension(Nfreq,2), intent(OUT) :: Us
       complex(kind=8), dimension(Nelem,Nfreq), intent(OUT) :: ChiLap
       real(kind=8), dimension(Nelem,2) :: n, CPoint
       integer :: I
@@ -107,15 +108,18 @@ subroutine BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, NFreq,
       call collocation(Nelem, Xnode, Cpoint)
       alphaRad = alpha*PI/dble(180)
       alphaAmplRad= alphaAmpl*PI/dble(180)
+      Us(:,:) = dcmplx(0)
+      call bodyrotation(uscalar, alpha, U)
+      Us(1,:) = dcmplx(U)
       wa = dble(2)*PI*freq    ![rad/s]
       do i = 1, Nelem
        R = Cpoint(i,:) - Xo
        ChiLap(i,1) = -Uscalar*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2))
        cospart = alphaAmplRad*wa*(R(1)*n(i,2)-R(2)*n(i,1))
-       sinpart = -Uscalar*alphaAmplRad*(-dsin(alpharad)*n(i,1)+dcos(alpharad)*n(i,2))
-       ChiLap(i,2) = dcmplx(sinpart,cospart)
+       sinpart = Uscalar*alphaAmplRad*(-dsin(alpharad)*n(i,1)+dcos(alpharad)*n(i,2))
+       ChiLap(i,2) = dcmplx(cospart,sinpart)
        ChiLap(i,1) = ChiLap(i,1) + 25D-2*Uscalar*alphaAmplRad**2*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2))
-       ChiLap(i,3) = dcmplx(0, -25D-2*Uscalar*alphaAmplRad**2*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2)))
+       ChiLap(i,3) = -25D-2*Uscalar*alphaAmplRad**2*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2))
       end do
 end subroutine
 
@@ -154,7 +158,7 @@ subroutine BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut
 end subroutine
 
 
-subroutine BCondOscilLap(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, NFreq, s, ChiLap)
+subroutine BCondOscilLap(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, NFreq, s, Us, ChiLap)
       IMPLICIT NONE
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       integer, intent(IN) :: Nelem
@@ -162,8 +166,10 @@ subroutine BCondOscilLap(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, NFreq, s, 
       real(kind=8), intent(IN) :: VelAmpl, alpha, Freq, Uscalar
       integer, intent(IN) :: Nfreq
       complex(kind=8), dimension(Nfreq), intent(OUT) :: s
+      complex(kind=8), dimension(Nfreq,2), intent(OUT) :: Us
       complex(kind=8), dimension(Nelem,Nfreq), intent(OUT) :: ChiLap
       real(kind=8), dimension(Nelem,2) :: n
+      real(kind=8), dimension(2) :: U
       real(kind=8) :: alpharad
       integer :: I
       if (Nfreq .ne. 2) then
@@ -174,10 +180,14 @@ subroutine BCondOscilLap(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, NFreq, s, 
       end if
       s(1) = dcmplx(0)
       s(2) = dcmplx(0,Freq)
-      call normals(Nelem, Xnode, n)
+      call bodyrotation(uscalar, alpha, U)
       alpharad = alpha*PI/dble(180)
-      do I = 1, Nelem
+      Us(1,:) = dcmplx(U)
+      Us(2,1) = dcmplx(0,VelAmpl*dsin(alphaRad))
+      Us(2,2) = dcmplx(0,-VelAmpl*dcos(alphaRad))
+      call normals(Nelem, Xnode, n)
+      do I = 1,Nelem
        ChiLap(i,1) = dcmplx(-UScalar*(n(i,1)*dcos(alpharad) + n(i,2)*dsin(alpharad)))
-       ChiLap(i,2) = dcmplx(-VelAmpl*(-n(i,2)*dcos(alpharad) + n(i,1)*dsin(alpharad)))
+       ChiLap(i,2) = dcmplx(0,VelAmpl*(-n(i,2)*dcos(alpharad) + n(i,1)*dsin(alpharad)))
       end do
 end subroutine

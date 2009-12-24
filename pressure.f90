@@ -34,13 +34,58 @@ subroutine calcpres(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, presr)
         dphidt = (phi(:,n) - phi(:,n-1)) / dt
        end if
        if (NTstep .GT. 1) then
-        CALL CalcSrfVel(Nelem, Xnode, TEat1, phi(:,n), chi(:,n), srfvel)
+        call CalcSrfVel(Nelem, Xnode, TEat1, phi(:,n), chi(:,n), srfvel)
         do k = 1,Nelem
          v2 = dot_product(srfvel(k,:), srfvel(k,:))
          timeder = dphidt(k)
          presr(k,n) = dot_product(U(n,:),srfvel(k,:)) - v2/dble(2) - timeder
         end do
        end if
+      end do
+end subroutine
+
+
+!Calculate the pressure in on the surface
+!  Nelem    # of elements
+!  Xnode    Coordinates of xnode
+!  TEat1    Node 1 is a trailing edge
+!  NTstep   # of timesteps
+!  phi      Potential
+!  Uinf     Speed
+!  pinfr    Pinf/rho
+!  presr     Pressure/rho (out)
+subroutine CalcPresLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, presLap)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, Nfreq
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      logical, intent(IN) :: TEat1
+      complex(kind=8), dimension(Nfreq), intent(IN) :: s
+      complex(kind=8), dimension(Nelem,Nfreq), intent(IN) :: phiLap, chiLap
+      complex(kind=8), dimension(Nfreq,2), intent(IN) :: Us
+      complex(kind=8), dimension(Nelem,2*Nfreq-1), intent(OUT) :: presLap
+      complex(kind=8), dimension(Nelem,NFreq,2) :: SrfVelLap
+      complex(kind=8) :: v2, uv
+      integer :: i, j, k
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
+      call calcSrfVelLap(Nelem, Xnode, TEat1, Nfreq, phiLap, chiLap, SrfVelLap)
+      do i = 1,Nelem
+       do j = 1,NFreq
+        presLap(i,j) = -dble(2)*PI*s(j)*phiLap(i,j)
+       end do
+       do j = 1,NFreq
+        do k = 1,NFreq
+         v2 = srfVelLap(i,j,1)*srfVelLap(i,k,1) + srfVelLap(i,j,2)*srfVelLap(i,k,2)
+         uv = Us(j,1)*srfVelLap(i,k,1) + Us(j,2)*srfVelLap(i,k,2)
+         presLap(i,j+k-1) = presLap(i,j+k-1) + uv/dble(2) - v2/dble(4)
+         v2 = dconjg(srfVelLap(i,j,1))*srfVelLap(i,k,1) + dconjg(srfVelLap(i,j,2))*srfVelLap(i,k,2)
+         uv = dconjg(Us(j,1))*srfVelLap(i,k,1) + dconjg(Us(j,2))*srfVelLap(i,k,2)
+         if ((k-j) < 0) then
+           v2 = dconjg(v2)
+           uv = dconjg(uv)
+         end if
+         presLap(i,abs(k-j)+1) = presLap(i,abs(k-j)+1) + uv/dble(2) - v2/dble(4)
+        end do
+       end do
       end do
 end subroutine
 

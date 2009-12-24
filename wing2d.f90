@@ -6,8 +6,8 @@
 !A circle in a _potential_ flow
 PROGRAM wing2d
       IMPLICIT NONE
-      integer, parameter :: Nelem = 119
-      integer, parameter :: NTime = 10000
+      integer, parameter :: Nelem = 9
+      integer, parameter :: NTime = 900
       integer, parameter :: NWake = (Nelem+1)/2*10
       integer :: i
 !     Vector of nodes global coordinates (x,y)
@@ -22,13 +22,15 @@ PROGRAM wing2d
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
       real(kind=8), dimension(NWake,2) :: XWnode
-      real(kind=8), dimension(Nelem,2) :: SrfVelEnd, CPoint
+      real(kind=8), dimension(Nelem,2) :: SrfVelEnd, CPoint, Utmp
+      real(kind=8), dimension(Ntime,2) :: Utet
       real(kind=8), dimension(Nelem, NTime) :: Chit, Phit
       real(kind=8), dimension(Nelem/2, NTime) :: DPhiBody
       real(kind=8), dimension(Nelem, NWake) :: D
       real(kind=8), dimension(NWake, NTime) :: DPhiW
       real(kind=8), dimension(NTime) :: cl
-      real(kind=8), dimension(Nelem,NTime) :: cp
+      real(kind=8), dimension(Nelem,NTime) :: presr
+      !real(kind=8), dimension(Nelem,NTime) :: cp
       real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       logical :: TEat1 = .true.
 !     Time step
@@ -42,24 +44,32 @@ PROGRAM wing2d
 !     Going straight
 !      call BCondStraight(Nelem, Xnode, Uscalar, alpha, Ntime, Ut, Chit)
 !     Moving up and down...
-!      call BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, Chit)
+      call BCondOscil(Nelem, Xnode, Uscalar, alpha, VelAmpl, Freq, DT, Ntime, Ut, Chit)
 !     Rotating
-      call BCondRot(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, DT, Ntime, Ut, ChiT)
+!      call BCondRot(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, Freq, DT, Ntime, Ut, ChiT)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
       call SrfMatBCD(Nelem, Xnode, NWake, XWnode, B, C, D)
       call SolvePhiTime(Nelem, B, C, NWake, D, NTime, Chit, Phit, DPhiW)
       call CalcCl(Nelem, Xnode, TEat1, NTime, DT, Ut, Phit, Chit, cl)
-      call CalcCp(Nelem, Xnode, TEat1, NTime, dt, Ut, phit, Chit, cp)
+      call calcpres(Nelem, Xnode, TEat1, NTime, dt, Ut, phit, chit, presr)
+      !call CalcCp(Nelem, Xnode, TEat1, NTime, dt, Ut, phit, Chit, cp)
       call CalcSrfVel(Nelem, Xnode, TEat1, Phit(:,1), Chit(:,1), srfvelend)
+      do i = 1,Ntime
+       call CalcSrfVel(Nelem, Xnode, TEat1, Phit(:,i), Chit(:,i), utmp)
+       utet(i,:) = utmp(1,:)
+      end do
       call CalcDPhiBody(Nelem, NTime, PhiT, DPhiBody)
+      open(unit=20, file='presurf')
+      open(unit=21, file='utime')
+      open(unit=22, file='chisurf')
+      open(unit=23, file='utet')
       do i = 1,NTime
-       open(unit=20, file='cpfile')
-       open(unit=21, file='utime')
-       open(unit=22, file='chisurf')
-       write(20,*) cp(:,i)
+       write(20,*) presr(:,i)
        write(21,*) Ut(i,:)
        write(22,*) Chit(:,i)
+       write(23,*) Utet(i,:)
       end do
+      close(unit=23)
       close(unit=22)
       close(unit=21)
       close(unit=20)
