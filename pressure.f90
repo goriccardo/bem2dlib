@@ -115,6 +115,26 @@ subroutine calccp(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, cp)
 end subroutine
 
 
+subroutine calcCpLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, cp)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, Nfreq
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      logical, intent(IN) :: TEat1
+      complex(kind=8), dimension(Nfreq), intent(IN) :: s
+      complex(kind=8), dimension(Nelem,Nfreq), intent(IN) :: phiLap, chiLap
+      complex(kind=8), dimension(Nfreq,2), intent(IN) :: Us
+      complex(kind=8), dimension(Nelem,2*Nfreq-1) :: presLap
+      complex(kind=8), dimension(Nelem,2*Nfreq-1), intent(OUT) :: cp
+      real(kind=8) :: ru2
+      integer :: n
+      call CalcPresLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, presLap)
+      ru2 = 0.5D0*dot_product(cdabs(Us(1,:)),cdabs(Us(1,:)))
+      do n = 1,2*Nfreq-1
+       cp(:,n) = presLap(:,n)/ru2
+      end do
+end subroutine
+
+
 !Lift on the upper side of a symmetric profile
 subroutine calcHalfLift(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, lift)
       IMPLICIT NONE
@@ -171,8 +191,6 @@ subroutine calcHalfCl(Nelem, Xnode, TEat1, NTstep, dt, U, phi, chi, cl)
 end subroutine
 
 
-
-!Lift on the upper side of a symmetric profile
 subroutine CalcCl(Nelem, Xnode, TEat1, NTime, dt, U, phi, chi, cl)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem, NTime
@@ -191,6 +209,33 @@ subroutine CalcCl(Nelem, Xnode, TEat1, NTime, dt, U, phi, chi, cl)
       CALL normals(Nelem, Xnode, nrm)
       CALL deltas(Nelem, Xnode, ds)
       do n = 1,NTime
+       F = 0.
+       do k = 1,Nelem
+        F = F - nrm(k,:)*cp(k,n)*ds(k)
+       end do
+       cl(n) = F(2)
+      end do
+end subroutine
+
+
+subroutine CalcClLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, cl)
+      IMPLICIT NONE
+      integer, intent(IN) :: Nelem, Nfreq
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      logical, intent(IN) :: TEat1
+      complex(kind=8), dimension(Nfreq), intent(IN) :: s
+      complex(kind=8), dimension(Nelem,Nfreq), intent(IN) :: phiLap, chiLap
+      complex(kind=8), dimension(Nfreq,2), intent(IN) :: Us
+      complex(kind=8), dimension(Nelem,2*Nfreq-1) :: cp
+      complex(kind=8), dimension(2*Nfreq-1), intent(OUT) :: cl
+      real(kind=8), dimension(Nelem) :: ds
+      complex(kind=8), dimension(2):: F
+      real(kind=8), dimension(Nelem,2) :: nrm
+      integer :: k, n
+      CALL calcCpLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, cp)
+      CALL normals(Nelem, Xnode, nrm)
+      CALL deltas(Nelem, Xnode, ds)
+      do n = 1,2*Nfreq-1
        F = 0.
        do k = 1,Nelem
         F = F - nrm(k,:)*cp(k,n)*ds(k)

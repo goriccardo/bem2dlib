@@ -6,7 +6,7 @@
 !A circle in a _potential_ flow
 PROGRAM wing2dlap
       IMPLICIT NONE
-      integer, parameter :: Nelem = 9
+      integer, parameter :: Nelem = 119
       integer, parameter :: Nfreq = 2
       integer, parameter :: NWake = (Nelem+1)/2*10
       integer :: i
@@ -27,6 +27,7 @@ PROGRAM wing2dlap
 !     real(kind=8), dimension(Nelem/2, NTime) :: DPhiBody
       complex(kind=8), dimension(Nelem,Nfreq,2) :: srfvelLap
       complex(kind=8), dimension(Nelem,2*Nfreq-1) :: presLap
+      complex(kind=8), dimension(2*Nfreq-1) :: clLap
       real(kind=8), dimension(Nelem, NWake) :: D
 !     Time step
       real(kind=8) :: DT, CalcDT
@@ -46,10 +47,13 @@ PROGRAM wing2dlap
       call SolvePhiLap(Nelem, B, C, Nwake, D, Nfreq, s, DT, ChiLap, PhiLap)
       call calcSrfVelLap(Nelem, Xnode, TEat1, Nfreq, phiLap, chiLap, srfvelLap)
       call CalcPresLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, presLap)
+      call CalcClLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, clLap)
       open(unit=30, file='phisurflap')
       open(unit=31, file='chisurflap')
       open(unit=32, file='velsurflap')
       open(unit=33, file='presurflap')
+      open(unit=34, file='cllap')
+      write(34,1001) clLap
       do i = 1,Nelem
        write(30,1001) PhiLap(i,:)
        write(31,1001) ChiLap(i,:)
@@ -61,5 +65,6 @@ PROGRAM wing2dlap
       close(unit=30)
       close(unit=31)
       close(unit=32)
+      close(unit=34)
  1001 FORMAT('',100(F15.8))
 END PROGRAM
