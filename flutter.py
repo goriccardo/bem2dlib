@@ -24,7 +24,7 @@ def main():
     K = array([[O2, O2*xie],[O2*xie, ra**2+O2*xie**2]])
 
     I = complex(0,1)
-    karr = linspace(0.2,0.4,100)
+    karr = linspace(0.2,1,100)
 
     z1 = []
     z2 = []
@@ -38,8 +38,6 @@ def main():
         z2.append(zz[1])
     z1 = array(z1)
     z2 = array(z2)
-    #plot(real(z1),imag(z1))
-    #plot(real(z2),imag(z2))
     figure(1)
     plot(karr,real(z1))
     plot(karr,real(z2))

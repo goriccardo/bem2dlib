@@ -19,7 +19,7 @@ subroutine EMatrixWing(Nelem, NWake, rt, p, E)
       complex(kind=8), dimension(Nelem,Nelem) :: DRS
       complex(kind=8), dimension(Nelem,Nelem) :: A
       complex(kind=8), dimension(Nelem) :: IPIV
-      real(kind=8) :: DT, dist, CalcDT, h
+      real(kind=8) :: DT, CalcDT, h
       integer :: i, k, km1, kp1, NOE, INFO
 
       ! Geometry
@@ -52,22 +52,24 @@ subroutine EMatrixWing(Nelem, NWake, rt, p, E)
       ! Create E_BT
       call DeltaS(Nelem, Xnode, ds)
       EBT(:,:) = dcmplx(0)
-      h = dist( (Xnode(3,:) + Xnode(2,:))/2., (Xnode(2,:) + Xnode(1,:))/2. )
+      h = Cpoint(2,1)-Cpoint(1,1)
       EBT(1,1) = -1/h
       EBT(1,2) = 1/h
-      h = dist( (Xnode(1,:) + Xnode(Nelem,:))/2., (Xnode(Nelem,:) + Xnode(Nelem-1,:))/2. )
+      h = Cpoint(Nelem,1)-Cpoint(Nelem-1,1)
       EBT(Nelem,Nelem-1) = -1/h
       EBT(Nelem,Nelem) = 1/h
       do k = 2, Nelem-1
        km1 = NOE(Nelem, k,-1)
        kp1 = NOE(Nelem, k, 1)
-       h = (DS(km1)+DS(kp1))/dble(2)+DS(k)
-       EBT(k,k-1) = -1/h
-       EBT(k,k+1) =  1/h
+       h = Cpoint(kp1,1)-Cpoint(km1,1)
+       if (dabs(h) .gt. 1.D-10) then
+         EBT(k,k-1) = -1/h
+         EBT(k,k+1) =  1/h
+       end if
       end do
-      EBT = -2*p*EBT
+      EBT = -2*EBT
       do i = 1, Nelem
-       EBT(i,i) = EBT(i,i)-2
+       EBT(i,i) = EBT(i,i)-2.D0*p
       end do
 
       ! Create EGF

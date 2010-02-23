@@ -21,5 +21,5 @@ PROGRAM etest
       do i = 1,2
        write(*,1001) f(i)
       end do
- 1001 FORMAT('',100(F15.8))
+1001 FORMAT('',100(F15.8))
 END PROGRAM
