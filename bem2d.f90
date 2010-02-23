@@ -62,12 +62,15 @@ subroutine SolvePhiLap(N, B, C, Nwake, D, Nfreq, s, DT, ChiLap, PhiLap)
       complex(kind=8), dimension(N,Nfreq), intent(IN) :: ChiLap
       complex(kind=8), dimension(N,Nfreq), intent(OUT) :: PhiLap
       complex(kind=8), dimension(Nfreq), intent(IN) :: s
+      complex(kind=8) :: ss
       real(kind=8), intent(IN) :: DT
       integer :: i, j, INFO
       complex(kind=8), dimension(N,N) :: A
       complex(kind=8), dimension(N) :: RHS, IPIV
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       do i = 1, Nfreq
-       call MatDRS(N, NWake, D, s(i), DT, DRS)
+       ss = 2.D0*PI*s(i)
+       call MatDRS(N, NWake, D, ss, DT, DRS)
        A = - dcmplx(C) - DRS
        do j = 1, N
         A(j,j) = A(j,j) + dcmplx(0.5,0.)

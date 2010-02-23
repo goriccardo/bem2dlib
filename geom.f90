@@ -85,14 +85,14 @@ subroutine bodyrotation(uscalar, alpha, u)
 end subroutine
 
 
-!If clockwise is positive then rotate clockwise, else counterclockwise
-subroutine rotateVec90(clockwise, InVec, OutVec)
+!If counterclockwise is positive then rotate counterclockwise, else clockwise
+subroutine rotateVec90(counterclockwise, InVec, OutVec)
        IMPLICIT NONE
        real(kind=8), dimension(2), intent(IN) :: InVec
        real(kind=8), dimension(2), intent(OUT) :: OutVec
-       integer, intent(IN) :: clockwise
+       integer, intent(IN) :: counterclockwise
        integer :: s
-       s = sign(1,clockwise)
+       s = sign(1,counterclockwise)
        OutVec(1) = -dble(s)*InVec(2)
        OutVec(2) = dble(s)*InVec(1)
 end subroutine

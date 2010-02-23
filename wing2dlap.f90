@@ -16,7 +16,7 @@ PROGRAM wing2dlap
       real(kind=8), parameter :: Chord = 1.D0, Thick = 0.1D0, uscalar = 1.D0
       real(kind=8), parameter :: Freq = 0.05D0, VelAmpl = 0.1D0, alphaAmpl = 10.D0
       real(kind=8) :: UHoriz
-      real(kind=8) :: alpha = 5.D0
+      real(kind=8) :: alpha = 0.D0
       real(kind=8), dimension(2) :: Xo = (/0.25,0./)
       complex(kind=8), dimension(Nfreq) :: s
 !     Potential and normal wash on the surface
@@ -26,7 +26,7 @@ PROGRAM wing2dlap
       complex(kind=8), dimension(Nfreq,2) :: Us
 !     real(kind=8), dimension(Nelem/2, NTime) :: DPhiBody
       complex(kind=8), dimension(Nelem,Nfreq,2) :: srfvelLap
-      complex(kind=8), dimension(Nelem,2*Nfreq-1) :: presLap
+      complex(kind=8), dimension(Nelem,2*Nfreq-1) :: presLap, cpLap
       complex(kind=8), dimension(2*Nfreq-1) :: clLap
       real(kind=8), dimension(Nelem, NWake) :: D
 !     Time step
@@ -47,17 +47,20 @@ PROGRAM wing2dlap
       call SolvePhiLap(Nelem, B, C, Nwake, D, Nfreq, s, DT, ChiLap, PhiLap)
       call calcSrfVelLap(Nelem, Xnode, TEat1, Nfreq, phiLap, chiLap, srfvelLap)
       call CalcPresLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, presLap)
+      call CalcCpLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, cpLap)
       call CalcClLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, clLap)
       open(unit=30, file='phisurflap')
       open(unit=31, file='chisurflap')
       open(unit=32, file='velsurflap')
       open(unit=33, file='presurflap')
       open(unit=34, file='cllap')
+      open(unit=35, file='cplap')
       write(34,1001) clLap
       do i = 1,Nelem
        write(30,1001) PhiLap(i,:)
        write(31,1001) ChiLap(i,:)
        write(33,1001) presLap(i,:)
+       write(35,1001) cpLap(i,:)
       end do
       do i = 1,NFreq
        write(32,1001) srfVelLap(1,i,:)
@@ -66,5 +69,6 @@ PROGRAM wing2dlap
       close(unit=31)
       close(unit=32)
       close(unit=34)
+      close(unit=35)
  1001 FORMAT('',100(F15.8))
 END PROGRAM

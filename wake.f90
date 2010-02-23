@@ -38,6 +38,7 @@ END SUBROUTINE
 !R is the retard (delays) matrix
 !S is the stupid matrix
 !DRS is a 'temple' matrix [name by Robin & Martin (aka Riccardo)]
+!WARNING: s complex variable must be already in rad/s
 subroutine MatDRS(Nelem, NWake, D, s, DT, DRS)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem, NWake
@@ -49,8 +50,8 @@ subroutine MatDRS(Nelem, NWake, D, s, DT, DRS)
       complex(kind=8), dimension(Nelem,Nelem), intent(OUT) :: DRS
       real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       integer :: i
-      DRS(:,:) = 0.
-      ss = dble(2)*PI*s*DT
+      DRS(:,:) = dcmplx(0)
+      ss = s*DT
       do i = 1,NWake
        Rvec(i) = cdexp(-ss*dble(i))
       end do
