@@ -73,8 +73,8 @@ subroutine EMatrixWing(Nelem, NWake, rt, p, E)
       ! Create EGF
       EGF(:,:) = dcmplx(0)
       do i = 1, Nelem
-       EGF(1,i) = -n0(i,2)*ds(i)
-       EGF(2,i) = -n0(i,2)*ds(i)*Cpoint(i,1)
+       EGF(1,i) = n0(i,2)*ds(i)
+       EGF(2,i) = n0(i,2)*ds(i)*Cpoint(i,1)
       end do
       
       E = matmul(EGF,matmul(matmul(EBT,EIE),EBC))

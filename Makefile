@@ -13,7 +13,7 @@ EOBJS = $(OBJS) etest.o
 LIBS = -llapack
 
 F90 = gfortran
-F90FLAGS = -O2 -Wall
+F90FLAGS = -O2 -g -Wall
 LDFLAGS =
 
 all: wing2d circle2d wing2dlap etest
