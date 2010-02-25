@@ -1,5 +1,24 @@
-2D Boundary Element Method solver for the Quasi-Potential Flows
+2D Boundary Element Method solver for Quasi-Potential Flows
 
 Dependencies:
-- f2py
-- matplotlib (for plotting)
+- LAPACK
+- f2py (for python bindings)
+
+1) ######## How To Get Started ########
+To compile the library and the examples just call
+
+$ make
+
+To compile the python bindings (called bempy2d) call
+
+$ make python
+
+To cleanup the directory (remove object files) call
+
+$ make clean
+
+For bug reporting and helping please write to one of the
+authors listed in the AUTHORS file.
+
+This library is released under BSD licese; you should find a
+copy of this license in the LICENSE file.
