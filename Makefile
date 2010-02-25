@@ -1,5 +1,5 @@
 LIBSRCS = pressure.f90 geom.f90 fieldgrid.f90 wake.f90 velocity.f90 geomwing.f90 integrals.f90 bem2d.f90 \
-          geomcircle.f90 crappyvel.f90 boundaryc.f90 ematrices.f90
+          geomcircle.f90 boundaryc.f90 ematrices.f90
 
 SRCS = $(LIBSRCS) circle2d.f90 wing2d.f90 wing2dlap.f90 etest.f90
 
@@ -30,8 +30,11 @@ circle2d: $(COBJS)
 etest: $(EOBJS)
 	$(F90) $(LDFLAGS) -o $@ $(EOBJS) $(LIBS)
 
+dist:
+	tar -cvzf bem2dlib.tar.gz Makefile LICENSE AUTHORS README $(SRCS)
+
 clean:
-	rm -f $(COBJS) $(WOBJS)
+	rm -f $(COBJS) $(WOBJS) $(WLOBJS) $(EOBJS)
 
 python:
 	f2py -c $(LIBS) -m bempy2d $(LIBSRCS)
