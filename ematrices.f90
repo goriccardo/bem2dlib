@@ -1,3 +1,6 @@
+!Copyright (c) 2010 Riccardo Gori <goriccardo@gmail.com>
+!Released under BSD license, see LICENSE
+
 !Return the adimensional matrix E_BC for the wing
 ! rt: Thick ratio (IN)
 ! p : Complex variable (IN)

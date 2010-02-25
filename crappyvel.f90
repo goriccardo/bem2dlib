@@ -1,3 +1,5 @@
+!Copyright (c) 2009 Riccardo Gori <goriccardo@gmail.com>
+!Released under BSD license, see LICENSE
 
 !Calculate B and C matrices on the field points X for velocity calculation
 SUBROUTINE FLDMATBCV(NX, X, N, XNODE, BX, BY, CX, CY)

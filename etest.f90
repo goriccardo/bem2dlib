@@ -1,4 +1,7 @@
-!A circle in a _potential_ flow
+!Copyright (c) 2010 Riccardo Gori <goriccardo@gmail.com>
+!Released under BSD license, see LICENSE
+
+!Test program
 PROGRAM etest
       IMPLICIT NONE
       integer, parameter :: Nelem = 119

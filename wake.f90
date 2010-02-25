@@ -1,4 +1,5 @@
 !Copyright (c) 2009 Jelle Reichert <jellereichert@gmail.com>
+!                   Riccardo Gori <goriccardo@gmail.com>
 !Released under BSD license, see LICENSE
 
 
