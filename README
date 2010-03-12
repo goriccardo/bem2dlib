@@ -1,24 +1,39 @@
-2D Boundary Element Method solver for Quasi-Potential Flows
+2D Boundary Element Method Solver for Quasi-Potential Incompressible Flows
 
 Dependencies:
 - LAPACK
 - f2py (for python bindings)
 
-1) ######## How To Get Started ########
-To compile the library and the examples just call
+1) ###################### Introduction & Motivation ###########################
+bem2dlib is the result of an assignment for the Aeroelasticity course at Roma
+Tre University in Rome. The code lacks documentation, testing and examples,
+but when it was written respecting deadlines was our priority. We're not
+planning to develop bem2dlib any further, but if somebody wants to step up to
+finish the code or needs some help just send a mail to goriccardo@gmail.com
+
+We're releasing the code in the wild hoping that it could be useful to some
+aeronautical engineering student or anybody interested in BEM methods. Let us
+know!
+
+
+2) ########################## How To Get Started ##############################
+To compile the library and the examples you will need a Fortran 90 compiler.
+The code has been tested with gfortran on Linux only, so it may not work with
+other compilers or platforms.
+To get the code compiled just call:
 
 $ make
 
-To compile the python bindings (called bempy2d) call
+To compile the python bindings (called bempy2d) call:
 
 $ make python
 
-To cleanup the directory (remove object files) call
+To cleanup the directory (remove object files) call:
 
 $ make clean
 
 For bug reporting and helping please write to one of the
 authors listed in the AUTHORS file.
 
-This library is released under BSD licese; you should find a
+This library is released under BSD license; you should find a
 copy of this license in the LICENSE file.
