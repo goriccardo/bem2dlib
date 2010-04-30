@@ -6,9 +6,10 @@
 !A circle in a _potential_ flow
 PROGRAM wing2dlap
       IMPLICIT NONE
-      integer, parameter :: Nelem = 119
-      integer, parameter :: Nfreq = 2
-      integer, parameter :: NWake = (Nelem+1)/2*10
+      integer, parameter :: Nup = 100
+      integer, parameter :: Nelem = Nup*2+1
+      integer, parameter :: Nfreq = 1
+      integer, parameter :: NWake = Nup*10
       integer :: i
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
@@ -16,7 +17,7 @@ PROGRAM wing2dlap
       real(kind=8), parameter :: Chord = 1.D0, Thick = 0.1D0, uscalar = 1.D0
       real(kind=8), parameter :: Freq = 0.05D0, VelAmpl = 0.1D0, alphaAmpl = 10.D0
       real(kind=8) :: UHoriz
-      real(kind=8) :: alpha = 0.D0
+      real(kind=8) :: alpha = 4.D0
       real(kind=8), dimension(2) :: Xo = (/0.25,0./)
       complex(kind=8), dimension(Nfreq) :: s
 !     Potential and normal wash on the surface
@@ -34,12 +35,15 @@ PROGRAM wing2dlap
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       logical :: TEat1 = .true.
 !     The program starts here!
-      call GeomWing(Nelem, Xnode, Chord, Thick)
+      !call GeomWing(Nelem, Xnode, Chord, Thick)
+      call GeomNACA00xx(NUp, Chord, Thick, Xnode)
       UHoriz = Uscalar*dcos(alpha*PI/dble(180))
       DT = CalcDT(Nelem, Xnode, UHoriz)
       write(*,*) "Timestep = ",DT
+!     Zero Frequency
+      call BCondStraightLap(Nelem, Xnode, uscalar, alpha, Nfreq, s, Us, Chilap)
 !     Oscillation
-      call BCondOscilLap(Nelem, Xnode, uscalar, alpha, VelAmpl, freq, NFreq, s, Us, ChiLap)
+!      call BCondOscilLap(Nelem, Xnode, uscalar, alpha, VelAmpl, freq, NFreq, s, Us, ChiLap)
 !     Rotation
 !      call BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, freq, NFreq, s, Us, ChiLap)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)

@@ -6,10 +6,10 @@
 !A circle in a _potential_ flow
 PROGRAM wing2d
       IMPLICIT NONE
-      integer, parameter :: NupElem = 100
+      integer, parameter :: NupElem = 20
       integer, parameter :: Nelem = NupElem*2+1
-      integer, parameter :: NTime = 10000
-      integer, parameter :: NWake = Nelem*10
+      integer, parameter :: NTime = 500
+      integer, parameter :: NWake = NupElem*10
       integer :: i
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode

@@ -36,6 +36,39 @@ subroutine BCondStraight(Nelem, Xnode, Uscalar, alpha, Ntime, Ut, ChiTime)
 end subroutine
 
 
+subroutine BCondStraightLap(Nelem, Xnode, uscalar, alpha, Nfreq, s, Us, Chilap)
+      IMPLICIT NONE
+      real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
+      integer, intent(IN) :: Nelem
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      real(kind=8), intent(IN) :: Uscalar, alpha
+      real(kind=8) :: alpharad, wa, Freq
+      real(kind=8), dimension(2) :: U
+      integer, intent(IN) :: NFreq
+      complex(kind=8), dimension(Nfreq), intent(OUT) :: s
+      complex(kind=8), dimension(Nfreq,2), intent(OUT) :: Us
+      complex(kind=8), dimension(Nelem,Nfreq), intent(OUT) :: ChiLap
+      real(kind=8), dimension(Nelem,2) :: n, CPoint
+      integer :: I
+      if (Nfreq .ne. 1) then
+        write(*,*) "WARNING, BCondStraightLap needs Nfreq == 1"
+        s(:) = dcmplx(0)
+        ChiLap(:,:) = 0.
+        return
+      end if
+      s(1) = dcmplx(0)
+      call normals(Nelem, Xnode, n)
+      call collocation(Nelem, Xnode, Cpoint)
+      alphaRad = alpha*PI/dble(180)
+      call bodyrotation(uscalar, alpha, U)
+      Us(1,:) = dcmplx(U)
+      wa = dble(2)*PI*freq    ![rad/s]
+      do i = 1, Nelem
+       ChiLap(i,1) = -Uscalar*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2))
+      end do
+end subroutine
+
+
 !Impose boundary conditions for a roto-translating body
 !in the air frame of reference
 ! N         # of elements

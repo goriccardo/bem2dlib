@@ -4,15 +4,14 @@
 !Return the adimensional matrix E_BC for the wing
 ! rt: Thick ratio (IN)
 ! p : Complex variable (IN)
-subroutine EMatrixWing(Nelem, NWake, rt, p, E)
+subroutine EMatrixWing(Nelem, Xnode, NWake, p, E)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem, NWake
-      real(kind=8), intent(IN) :: rt
       complex(kind=8), intent(IN) :: p
       complex(kind=8), dimension(2,2), intent(OUT) :: E
       complex(kind=8) :: EBC(Nelem,2), EIE(Nelem,Nelem), EBT(Nelem,Nelem), EGF(2,Nelem)
       real(kind=8), parameter :: chord = 1.D0, Uinf = 1.D0, alpha = 0.D0
-      real(kind=8), dimension(Nelem,2) :: Xnode
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       real(kind=8), dimension(NWake,2) :: XWnode
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
       real(kind=8), dimension(Nelem) :: ds
@@ -26,7 +25,6 @@ subroutine EMatrixWing(Nelem, NWake, rt, p, E)
       integer :: i, k, km1, kp1, NOE, INFO
 
       ! Geometry
-      call GeomWing(Nelem, Xnode, chord, rt)
       DT = CalcDT(Nelem, Xnode, Uinf)
       call WakeGrid(Nelem, Xnode, Uinf, DT, NWake, XWnode)
 
@@ -81,6 +79,6 @@ subroutine EMatrixWing(Nelem, NWake, rt, p, E)
        EGF(1,i) = n0(i,2)*ds(i)
        EGF(2,i) = n0(i,2)*ds(i)*Cpoint(i,1)
       end do
-      
+
       E = matmul(EGF,matmul(matmul(EBT,EIE),EBC))
 end subroutine
