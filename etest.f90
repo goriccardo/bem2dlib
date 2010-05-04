@@ -9,7 +9,7 @@ PROGRAM etest
       integer, parameter :: NWake = Nup*10
       integer, parameter :: Nlen = 160
       real(kind=8), dimension(Nelem, 2) :: Xnode
-      real(kind=8), parameter :: rt = 0.12D0, chord = 1., alpha = 0., L = 8.D0
+      real(kind=8), parameter :: rt = 6.D-2, chord = 1., alpha = 0., L = 2.5D0
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       real(kind=8) :: thick = chord*rt
       complex(kind=8) :: p = 2.D0*PI*dcmplx(0,0.05D0)
@@ -32,3 +32,15 @@ PROGRAM etest
       end do
 1001 FORMAT('',100(F15.8))
 END PROGRAM
+
+
+! subroutine theodorsen(q1, q2, om th)
+!       implicit none
+!       real(kind=8), intent(in) :: q1, q2, om
+!       real(kind=8), dimension(2), intent(out) :: th
+!       real(kind=8) :: rho , b, om, h, a, U
+!       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
+!       complex(kind=8), parameter :: j = dcmplx(0.D0,1.D0)
+!       th(1) = pi*rho*b**2*(-om**2*h-0.5D0*b*om**2*a+j*om*U*a) + 2.D0*pi*rho*U*b*C(k)*(j*om*h+b*j*om*a+u*a)
+!       return
+! end function
