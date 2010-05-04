@@ -103,3 +103,30 @@ subroutine EMatrixWing2D(Nelem, Xnode, alpha, NWake, p, E)
       end do
       E = matmul(EGF,EE)
 end subroutine
+
+
+subroutine EMatrixWing3DA(Nelem, Xnode, alpha, Nlen, L, Nwake, p, E)
+      implicit none
+      integer, intent(IN) :: Nelem, NWake, Nlen
+      real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      real(kind=8), intent(IN) :: alpha, L
+      complex(kind=8), intent(IN) :: p
+      complex(kind=8), dimension(2,2), intent(OUT) :: E
+      complex(kind=8), dimension(Nelem,2) :: EE
+      real(kind=8) :: dL, q1, q2
+      real(kind=8), dimension(Nelem) :: ds
+      real(kind=8), dimension(Nelem,2) :: n0, Cpoint
+      integer :: i
+      call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 0.5, p, EE)
+      call DeltaS(Nelem, Xnode, ds)
+      call normals(Nelem, Xnode, n0)
+      dL = L/dble(Nlen)
+      do i = 1, Nlen
+       q1 = (dL*i)**2
+       q2 = dL*i
+       E(1,1) = sum(n0(:,2)*ds(:)*EE(:,1)*q1)
+       E(1,2) = sum(n0(:,2)*ds(:)*EE(:,2)*q2)
+       E(2,1) = sum(n0(:,2)*ds(:)*Cpoint(:,1)*EE(:,1)*q1)
+       E(2,2) = sum(n0(:,2)*ds(:)*Cpoint(:,1)*EE(:,2)*q2)
+      end do
+end subroutine
