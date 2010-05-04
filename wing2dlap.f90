@@ -8,20 +8,21 @@ PROGRAM wing2dlap
       IMPLICIT NONE
       integer, parameter :: Nup = 100
       integer, parameter :: Nelem = Nup*2+1
-      integer, parameter :: Nfreq = 1
+      integer, parameter :: Nfreq = 2
       integer, parameter :: NWake = Nup*10
-      integer :: i
+      integer :: i, j
 !     Vector of nodes global coordinates (x,y)
       real(kind=8), dimension(Nelem,2) :: Xnode
 !     Circle radius
-      real(kind=8), parameter :: Chord = 1.D0, Thick = 0.1D0, uscalar = 1.D0
+      real(kind=8), parameter :: Chord = 1.D0, Thick = 0.12D0, uscalar = 1.D0
       real(kind=8), parameter :: Freq = 0.05D0, VelAmpl = 0.1D0, alphaAmpl = 10.D0
       real(kind=8) :: UHoriz
-      real(kind=8) :: alpha = 4.D0
+      real(kind=8) :: alpha = 0.D0
       real(kind=8), dimension(2) :: Xo = (/0.25,0./)
       complex(kind=8), dimension(Nfreq) :: s
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
+      real(kind=8), dimension(Nelem,2) :: CPoint
       real(kind=8), dimension(NWake,2) :: XWnode
       complex(kind=8), dimension(Nelem,Nfreq) :: ChiLap, PhiLap
       complex(kind=8), dimension(Nfreq,2) :: Us
@@ -41,9 +42,9 @@ PROGRAM wing2dlap
       DT = CalcDT(Nelem, Xnode, UHoriz)
       write(*,*) "Timestep = ",DT
 !     Zero Frequency
-      call BCondStraightLap(Nelem, Xnode, uscalar, alpha, Nfreq, s, Us, Chilap)
+!      call BCondStraightLap(Nelem, Xnode, uscalar, alpha, Nfreq, s, Us, Chilap)
 !     Oscillation
-!      call BCondOscilLap(Nelem, Xnode, uscalar, alpha, VelAmpl, freq, NFreq, s, Us, ChiLap)
+      call BCondOscilLap(Nelem, Xnode, uscalar, alpha, VelAmpl, freq, NFreq, s, Us, ChiLap)
 !     Rotation
 !      call BCondRotLap(Nelem, Xnode, Xo, Uscalar, alpha, alphaAmpl, freq, NFreq, s, Us, ChiLap)
       call WakeGrid(Nelem, Xnode, Uscalar, DT, NWake, XWnode)
@@ -53,6 +54,7 @@ PROGRAM wing2dlap
       call CalcPresLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, presLap)
       call CalcCpLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, cpLap)
       call CalcClLap(Nelem, Xnode, TEat1, Nfreq, s, Us, phiLap, chiLap, clLap)
+      call Collocation(Nelem, Xnode, Cpoint)
       open(unit=30, file='phisurflap')
       open(unit=31, file='chisurflap')
       open(unit=32, file='velsurflap')
@@ -63,11 +65,13 @@ PROGRAM wing2dlap
       do i = 1,Nelem
        write(30,1001) PhiLap(i,:)
        write(31,1001) ChiLap(i,:)
-       write(33,1001) presLap(i,:)
+       write(33,1001) Cpoint(i,:), presLap(i,:)
        write(35,1001) cpLap(i,:)
       end do
       do i = 1,NFreq
-       write(32,1001) srfVelLap(1,i,:)
+       do j = 1, Nelem
+        write(32,1001) Cpoint(j,:), srfVelLap(j,i,:)
+       end do
       end do
       close(unit=30)
       close(unit=31)
