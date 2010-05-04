@@ -8,7 +8,7 @@ PROGRAM etest
       integer, parameter :: Nelem = Nup*2+1
       integer, parameter :: NWake = Nup*10
       real(kind=8), dimension(Nelem, 2) :: Xnode
-      real(kind=8), parameter :: rt = 0.12D0, chord = 1.
+      real(kind=8), parameter :: rt = 0.12D0, chord = 1., alpha = 0.
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       real(kind=8) :: thick = chord*rt
       complex(kind=8) :: p = 2.D0*PI*dcmplx(0,0.05D0)
@@ -19,7 +19,7 @@ PROGRAM etest
       q(2) = dcmplx(0)
       E(:,:) = 0
       call GeomNACA00xx(Nup, Chord, Thick, Xnode)
-      call EMatrixWing2d(Nelem, Xnode, NWake, p, E)
+      call EMatrixWing2d(Nelem, Xnode, alpha, NWake, p, E)
       do i = 1,2
        write(*,1001) E(i,:)
       end do

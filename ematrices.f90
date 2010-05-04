@@ -2,24 +2,27 @@
 !Released under BSD license, see LICENSE
 
 !Return the adimensional matrix E_BC for the wing -> E(p)
+! xe: Rotation center
 ! p : Complex variable (IN)
-subroutine EMatrixWingPres(Nelem, Xnode, NWake, p, E)
+subroutine EMatrixWingPres(Nelem, Xnode, alpha, NWake, xe, p, E)
       IMPLICIT NONE
       integer, intent(IN) :: Nelem, NWake
       complex(kind=8), intent(IN) :: p
+      real(kind=8), intent(IN) :: xe, alpha
       complex(kind=8), dimension(Nelem,2), intent(OUT) :: E
       complex(kind=8) :: EBC(Nelem,2), EIE(Nelem,Nelem), EBT(Nelem,Nelem)
-      real(kind=8), parameter :: chord = 1.D0, Uinf = 1.D0, alpha = 0.D0
+      real(kind=8), parameter :: chord = 1.D0, Uinf = 1.D0
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       real(kind=8), dimension(NWake,2) :: XWnode
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
-      real(kind=8), dimension(2) :: nk
+      real(kind=8), dimension(2) :: nk, Uvec
       real(kind=8), dimension(Nelem,Nelem) :: B, C
       real(kind=8), dimension(Nelem, NWake) :: D
       complex(kind=8), dimension(Nelem,Nelem) :: DRS
       complex(kind=8), dimension(Nelem,Nelem) :: A
       complex(kind=8), dimension(Nelem) :: IPIV
       real(kind=8) :: DT, CalcDT, h
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       integer :: i, k, km1, kp1, NOE, INFO
 
       ! Geometry
@@ -29,11 +32,13 @@ subroutine EMatrixWingPres(Nelem, Xnode, NWake, p, E)
       call collocation(Nelem, Xnode, Cpoint)
       call normals(Nelem, Xnode, n0)
 
+      Uvec = (/dcos(alpha)*PI/dble(180), -dsin(alpha)*PI/dble(180)/)
+
       ! Create E_BC(1)
       do i = 1, Nelem
        call rotateVec90(1, n0(i,:), nk)
        EBC(i,1) = p*n0(i,2)
-       EBC(i,2) = -nk(1)+p*n0(i,2)*CPoint(i,1)
+       EBC(i,2) = sum(Uvec*nk) + p*n0(i,2)*(CPoint(i,1)-xe)
       end do
 
       ! Create E_IE
@@ -75,10 +80,11 @@ subroutine EMatrixWingPres(Nelem, Xnode, NWake, p, E)
 end subroutine
 
 
-subroutine EMatrixWing2D(Nelem, Xnode, NWake, p, E)
+subroutine EMatrixWing2D(Nelem, Xnode, alpha, NWake, p, E)
       implicit none
       integer, intent(IN) :: Nelem, NWake
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
+      real(kind=8), intent(IN) :: alpha
       complex(kind=8), intent(IN) :: p
       complex(kind=8), dimension(2,2), intent(OUT) :: E
       complex(kind=8), dimension(Nelem,2) :: EE
@@ -86,7 +92,7 @@ subroutine EMatrixWing2D(Nelem, Xnode, NWake, p, E)
       real(kind=8), dimension(Nelem) :: ds
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
       integer :: i
-      call EMatrixWingPres(Nelem, Xnode, NWake, p, EE)
+      call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 0., p, EE)
       call DeltaS(Nelem, Xnode, ds)
       call normals(Nelem, Xnode, n0)
       ! Create EGF
