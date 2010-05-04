@@ -19,7 +19,7 @@ PROGRAM etest
       q(2) = dcmplx(0)
       E(:,:) = 0
       call GeomNACA00xx(Nup, Chord, Thick, Xnode)
-      call EMatrixWing(Xnode, Nelem, NWake, p, E)
+      call EMatrixWing2d(Nelem, Xnode, NWake, p, E)
       do i = 1,2
        write(*,1001) E(i,:)
       end do
