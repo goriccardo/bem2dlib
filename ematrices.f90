@@ -92,7 +92,7 @@ subroutine EMatrixWing2D(Nelem, Xnode, alpha, NWake, p, E)
       real(kind=8), dimension(Nelem) :: ds
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
       integer :: i
-      call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 0., p, EE)
+      call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 0.D0, p, EE)
       call DeltaS(Nelem, Xnode, ds)
       call normals(Nelem, Xnode, n0)
       ! Create EGF
@@ -117,16 +117,17 @@ subroutine EMatrixWing3DA(Nelem, Xnode, alpha, Nlen, L, Nwake, p, E)
       real(kind=8), dimension(Nelem) :: ds
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
       integer :: i
-      call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 0.5, p, EE)
+      call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 5.D-1, p, EE)
       call DeltaS(Nelem, Xnode, ds)
       call normals(Nelem, Xnode, n0)
       dL = L/dble(Nlen)
+      E(:,:) = 0.
       do i = 1, Nlen
        q1 = (dL*i)**2
        q2 = dL*i
-       E(1,1) = sum(n0(:,2)*ds(:)*EE(:,1)*q1)
-       E(1,2) = sum(n0(:,2)*ds(:)*EE(:,2)*q2)
-       E(2,1) = sum(n0(:,2)*ds(:)*Cpoint(:,1)*EE(:,1)*q1)
-       E(2,2) = sum(n0(:,2)*ds(:)*Cpoint(:,1)*EE(:,2)*q2)
+       E(1,1) = E(1,1) + sum(n0(:,2)*ds(:)*EE(:,1)*q1)*dL
+       E(1,2) = E(1,2) + sum(n0(:,2)*ds(:)*EE(:,2)*q2)*dL
+       E(2,1) = E(2,1) + sum(n0(:,2)*ds(:)*(Cpoint(:,1) - 5.D-1)*EE(:,1)*q1)*dL
+       E(2,2) = E(2,2) + sum(n0(:,2)*ds(:)*(Cpoint(:,1) - 5.D-1)*EE(:,2)*q2)*dL
       end do
 end subroutine
