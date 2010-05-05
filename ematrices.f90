@@ -95,11 +95,15 @@ subroutine EMatrixWing2D(Nelem, Xnode, alpha, NWake, p, E)
       call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 0.D0, p, EE)
       call DeltaS(Nelem, Xnode, ds)
       call normals(Nelem, Xnode, n0)
+      call collocation(Nelem, Xnode, Cpoint)
       ! Create EGF
       EGF(:,:) = dcmplx(0)
       do i = 1, Nelem
-       EGF(1,i) = n0(i,2)*ds(i)
+       EGF(1,i) = -n0(i,2)*ds(i)
        EGF(2,i) = n0(i,2)*ds(i)*Cpoint(i,1)
+      end do
+      do i = 1, Nelem
+       write(*,*) EE(i,:), Cpoint(i,1)
       end do
       E = matmul(EGF,EE)
 end subroutine
@@ -120,14 +124,16 @@ subroutine EMatrixWing3DA(Nelem, Xnode, alpha, Nlen, L, Nwake, p, E)
       call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 5.D-1, p, EE)
       call DeltaS(Nelem, Xnode, ds)
       call normals(Nelem, Xnode, n0)
+      call collocation(Nelem, Xnode, Cpoint)
       dL = L/dble(Nlen)
       E(:,:) = 0.
       do i = 1, Nlen
-       q1 = (dL*i)**2
-       q2 = dL*i
-       E(1,1) = E(1,1) + sum(n0(:,2)*ds(:)*EE(:,1)*q1)*dL
-       E(1,2) = E(1,2) + sum(n0(:,2)*ds(:)*EE(:,2)*q2)*dL
-       E(2,1) = E(2,1) + sum(n0(:,2)*ds(:)*(Cpoint(:,1) - 25.D-2)*EE(:,1)*q1)*dL
-       E(2,2) = E(2,2) + sum(n0(:,2)*ds(:)*(Cpoint(:,1) - 25.D-2)*EE(:,2)*q2)*dL
+       q1 = (i/dble(Nlen))**2
+       q2 = i/dble(Nlen)
+       E(1,1) = E(1,1) - sum(n0(:,2)*ds(:)*dL*EE(:,1)*q1)
+       E(1,2) = E(1,2) - sum(n0(:,2)*ds(:)*dL*EE(:,2)*q2)
+       E(2,1) = E(2,1) + sum(n0(:,2)*ds(:)*dL*EE(:,1)*q1*(Cpoint(:,1) - 5.D-1))
+       E(2,2) = E(2,2) + sum(n0(:,2)*ds(:)*dL*EE(:,2)*q2*(Cpoint(:,1) - 5.D-1))
       end do
 end subroutine
+
