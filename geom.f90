@@ -132,3 +132,11 @@ subroutine DeltaS(Nelem, Xnode, ds)
       end do
 end subroutine
 
+
+function modvecprod(a,b)
+      implicit none
+      real(kind=8), dimension(2) :: a, b
+      real(kind=8) :: modvecprod
+      modvecprod = a(1)*b(2) - b(1)*a(2)
+      return
+end function

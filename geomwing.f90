@@ -70,6 +70,28 @@ subroutine geomNACA00xx(Nelem, c, t, Xnode)
       call geomPolySymWing(Ncoef, Ka, Coef, Ecoef, Nelem, c, t, Xnode) 
 end subroutine
 
+
+!Four digit NACA profile:
+! c is the chord lenght
+! m is the maximum camber (100 m is the first digit)
+! p is the location of maximum camber (10 p is the second digit)
+! t is the thickness (100 t are the last two digits)
+!All values are relative to the chord
+!Example: NACA 2312 with chord = 1 is
+!  call geomNACAxxx(Nelem, 1, 0.02, 0.3, 0.12, Xnode)
+! subroutine geomNACAxxxx(Nelem, c, m, p, t, Xnode)
+!       implicit none
+!       integer, intent(IN) :: Nelem
+!       real(kind=8), intent(IN) :: c, m, p, t
+!       real(kind=8), dimension(Nelem*2+1,2), intent(OUT) :: Xnode
+!       integer, parameter :: Ncoef = 5
+!       real(kind=8) :: Ka = 5.D0
+!       real(kind=8), dimension(Ncoef) :: Coef = (/0.2969D0,-0.1260D0,-0.3516D0,0.2843D0,-0.1015D0/)
+!       real(kind=8), dimension(Ncoef) :: ECoef = (/0.5D0,1.D0,2.D0,3D0,4.D0/)
+!       
+! end subroutine
+
+
 !Create the mesh for a symmetrical wing described by a polynomial
 !       __
 !      \
