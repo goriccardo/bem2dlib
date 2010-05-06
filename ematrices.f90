@@ -109,6 +109,8 @@ subroutine EMatrixWing2D(Nelem, Xnode, alpha, NWake, p, E)
 end subroutine
 
 
+!Return the Generalized forces matrix adimensionalized by qD*b**2 for the lift
+!and qD*b**3 for the moment (qD is the dynamic pressure)
 subroutine EMatrixWing3DA(Nelem, Xnode, alpha, Nlen, L, Nwake, p, E)
       implicit none
       integer, intent(IN) :: Nelem, NWake, Nlen
@@ -117,7 +119,7 @@ subroutine EMatrixWing3DA(Nelem, Xnode, alpha, Nlen, L, Nwake, p, E)
       complex(kind=8), intent(IN) :: p
       complex(kind=8), dimension(2,2), intent(OUT) :: E
       complex(kind=8), dimension(Nelem,2) :: EE
-      real(kind=8) :: dL, q1, q2
+      real(kind=8) :: dL, q1, q2, st
       real(kind=8), dimension(Nelem) :: ds
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
       integer :: i
@@ -130,10 +132,11 @@ subroutine EMatrixWing3DA(Nelem, Xnode, alpha, Nlen, L, Nwake, p, E)
       do i = 1, Nlen
        q1 = (i/dble(Nlen))**2
        q2 = i/dble(Nlen)
-       E(1,1) = E(1,1) - sum(n0(:,2)*ds(:)*dL*EE(:,1)*q1)
-       E(1,2) = E(1,2) - sum(n0(:,2)*ds(:)*dL*EE(:,2)*q2)
-       E(2,1) = E(2,1) + sum(n0(:,2)*ds(:)*dL*EE(:,1)*q1*(Cpoint(:,1) - 5.D-1))
-       E(2,2) = E(2,2) + sum(n0(:,2)*ds(:)*dL*EE(:,2)*q2*(Cpoint(:,1) - 5.D-1))
+       st = dsqrt(1.D0 - (i/dble(NLen))**2)
+       E(1,1) = E(1,1) - sum(n0(:,2)*ds(:)*dL*EE(:,1)*q1*st)
+       E(1,2) = E(1,2) - sum(n0(:,2)*ds(:)*dL*EE(:,2)*q2*st)
+       E(2,1) = E(2,1) + sum(n0(:,2)*ds(:)*dL*EE(:,1)*q1*st*(Cpoint(:,1) - 5.D-1))
+       E(2,2) = E(2,2) + sum(n0(:,2)*ds(:)*dL*EE(:,2)*q2*st*(Cpoint(:,1) - 5.D-1))
       end do
 end subroutine
 

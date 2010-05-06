@@ -9,7 +9,7 @@ PROGRAM etest
       integer, parameter :: NWake = Nup*10
       integer, parameter :: Nlen = 100
       real(kind=8), dimension(Nelem, 2) :: Xnode
-      real(kind=8), parameter :: rt = 6.D-2, chord = 1.D0, alpha = 0.D0, L = 1.0D0
+      real(kind=8), parameter :: rt = 6.D-2, chord = 1.D0, alpha = 0.D0, L = 2.5D0
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       real(kind=8) :: thick = chord*rt
       complex(kind=8) :: p = 0*2.D0*PI*dcmplx(0,0.05D0)
