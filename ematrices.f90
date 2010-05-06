@@ -102,47 +102,39 @@ subroutine EMatrixWing2D(Nelem, Xnode, alpha, NWake, p, E)
        EGF(1,i) = -n0(i,2)*ds(i)
        EGF(2,i) = n0(i,2)*ds(i)*Cpoint(i,1)
       end do
-      do i = 1, Nelem
-       write(*,*) EE(i,:), Cpoint(i,1)
-      end do
       E = matmul(EGF,EE)
 end subroutine
 
 
 !Return the Generalized forces matrix adimensionalized by qD*b**2 for the lift
 !and qD*b**3 for the moment (qD is the dynamic pressure)
-subroutine EMatrixWing3DA(Nelem, Xnode, alpha, Nlen, L, Nwake, p, E)
+subroutine EMatrixWing3DA(Nelem, Xnode, alpha, L, Nwake, p, E)
       implicit none
-      integer, intent(IN) :: Nelem, NWake, Nlen
+      integer, intent(IN) :: Nelem, NWake
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       real(kind=8), intent(IN) :: alpha, L
       complex(kind=8), intent(IN) :: p
       complex(kind=8), dimension(2,2), intent(OUT) :: E
+      complex(kind=8), dimension(2,Nelem) :: EGF
       complex(kind=8), dimension(Nelem,2) :: EE
-      real(kind=8) :: dL, q1, q2, st, modvecprod
+      real(kind=8) :: modvecprod
       real(kind=8), dimension(Nelem) :: ds, b
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
       real(kind=8), dimension(2), parameter :: xo = (/0.5D0,0.D0/)
-      integer :: i, j
+      integer :: i
       call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 5.D-1, p, EE)
       call DeltaS(Nelem, Xnode, ds)
       call normals(Nelem, Xnode, n0)
       call collocation(Nelem, Xnode, Cpoint)
-      dL = L/dble(Nlen)
-      E(:,:) = 0.
-      do i = 1, Nlen
-       q1 = (i/dble(Nlen))**2
-       q2 = i/dble(Nlen)
-       st = 1.D0 !dsqrt(1.D0 - (i/dble(NLen))**2)
-       do j = 1, Nelem
-        b(j) = modvecprod(-n0(j,:),(Cpoint(j,:) - xo))
-       end do
-       E(1,1) = E(1,1) - sum(n0(:,2)*ds(:)*dL*EE(:,1)*q1*st)
-       E(1,2) = E(1,2) - sum(n0(:,2)*ds(:)*dL*EE(:,2)*q2*st)
-       E(2,1) = E(2,1) + sum(ds(:)*dL*EE(:,1)*q1*st*b(:))
-       E(2,2) = E(2,2) + sum(ds(:)*dL*EE(:,2)*q2*st*b(:))
+      do i = 1, Nelem
+       b(i) = modvecprod(-n0(i,:),(Cpoint(i,:) - xo))
+       EGF(1,i) = -n0(i,2)*ds(i)
+       EGF(2,i) = ds(i)*b(i)
       end do
-!       do i = 1, Nelem
-!        write(*,*) i, b(i)
-!       end do
+      E = matmul(EGF,EE)
+      E(1,1) = E(1,1)*L/5.D0
+      E(1,2) = E(1,2)*L/4.D0
+      E(2,1) = E(2,1)*L/4.D0
+      E(2,2) = E(2,2)*L/3.D0
 end subroutine
+

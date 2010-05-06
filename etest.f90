@@ -8,7 +8,7 @@ PROGRAM etest
       integer, parameter :: Nelem = Nup*2+1
       integer, parameter :: NWake = Nup*10
       real(kind=8), dimension(Nelem, 2) :: Xnode
-      real(kind=8), parameter :: rt = 6.D-2, chord = 1.D0, alpha = 0.D0, L = 1.0D0
+      real(kind=8), parameter :: rt = 6.D-2, chord = 1.D0, alpha = 0.D0, L = 2.5D0
       real(kind=8), parameter :: PI = 4.D0*datan(1.D0)
       real(kind=8), dimension(2,2) :: M, K
       real(kind=8) :: thick = chord*rt, vf
@@ -23,7 +23,7 @@ PROGRAM etest
       call GeomNACA00xx(Nup, Chord, Thick, Xnode)
       !call EMatrixWing2d(Nelem, Xnode, alpha, NWake, p, E)
       call EMatrixWing3DA(Nelem, Xnode, alpha, L, Nwake, p, E)
-      call theodorsen(p, L, Et)
+      call theodorsenST(p, L, Et)
       write(*,*) "BEM:"
       do i = 1,2
        write(*,1001) E(i,:)
@@ -42,7 +42,7 @@ PROGRAM etest
       do i = 1,2
        write(*,1001) f(i)
       end do
-      return
+!      return
       M(1,:) = (/1.D0, 0.D0/)
       M(2,:) = (/0.D0, .7D0/)
       K(1,:) = (/.0312D0, 0.D0/)

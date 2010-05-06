@@ -1,9 +1,10 @@
 LIBSRCS = pressure.f90 geom.f90 fieldgrid.f90 wake.f90 velocity.f90 geomwing.f90 integrals.f90 bem2d.f90 \
-          geomcircle.f90 boundaryc.f90 ematrices.f90 clnaca00xx.f90 vgmeth.f90
+          geomcircle.f90 boundaryc.f90 ematrices.f90 clnaca00xx.f90 vgmeth.f90 theo.f90
 
 SRCS = $(LIBSRCS) circle2d.f90 wing2d.f90 wing2dlap.f90 etest.f90 naca00xx.f90
 
-OBJS = pressure.o geom.o fieldgrid.o wake.o velocity.o integrals.o bem2d.o boundaryc.o ematrices.o geomwing.o vgmeth.o
+OBJS = pressure.o geom.o fieldgrid.o wake.o velocity.o integrals.o bem2d.o boundaryc.o ematrices.o \
+       geomwing.o vgmeth.o theo.f90
 
 COBJS = $(OBJS) circle2d.o geomcircle.o
 WOBJS = $(OBJS) wing2d.o
@@ -15,9 +16,10 @@ LIBS = -llapack
 
 F90 = gfortran
 F90FLAGS = -O2 -g -Wall
+LIBFLAGS = -shared -fPIC
 LDFLAGS =
 
-all: wing2d circle2d wing2dlap etest naca00xx
+all: wing2d circle2d wing2dlap etest naca00xx libbem2d.so
 
 wing2d: $(WOBJS)
 	$(F90) $(LDFLAGS) -o $@ $(WOBJS) $(LIBS)
@@ -33,6 +35,9 @@ naca00xx: $(NOBJS)
 
 etest: $(EOBJS)
 	$(F90) $(LDFLAGS) -o $@ $(EOBJS) $(LIBS)
+
+libbem2d.so:  $(OBJS)
+	$(F90) $(LDFLAGS) $(LIBFLAGS) -o $@ $(OBJS) $(LIBS)
 
 dist:
 	tar -cvzf bem2dlib.tar.gz Makefile LICENSE AUTHORS README $(SRCS)
