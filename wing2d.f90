@@ -17,7 +17,7 @@ PROGRAM wing2d
       real(kind=8), parameter :: Freq = 0.05D0, VelAmpl = 0.1D0, alphaAmpl = 10.D0
       real(kind=8) :: UHoriz
       real(kind=8) :: alpha = 5.D0
-      real(kind=8), dimension(2) :: Xo = (/0.25,0./)
+      real(kind=8), dimension(2), parameter :: Xo = (/0.25,0./)
       real(kind=8), dimension(NTime,2) :: Ut
 !     Potential and normal wash on the surface
       real(kind=8), dimension(Nelem,Nelem) :: B, C
