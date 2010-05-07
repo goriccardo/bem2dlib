@@ -4,7 +4,7 @@
 !Test program
 PROGRAM etest
       IMPLICIT NONE
-      integer, parameter :: Nup = 100
+      integer, parameter :: Nup = 30
       integer, parameter :: Nelem = Nup*2+1
       integer, parameter :: NWake = Nup*10
       real(kind=8), dimension(Nelem, 2) :: Xnode
@@ -42,12 +42,13 @@ PROGRAM etest
       do i = 1,2
        write(*,1001) f(i)
       end do
-!      return
+      !return
       M(1,:) = (/1.D0, 0.D0/)
       M(2,:) = (/0.D0, .7D0/)
       K(1,:) = (/.0312D0, 0.D0/)
       K(2,:) = (/0.D0, .7D0/)
       call flutterstriptheory(Nup, rt, L, alpha, 5.D0, M, K, Vf)
+      write(*,*) "U:", Vf
 1001 FORMAT('',100(F15.8))
 END PROGRAM
 

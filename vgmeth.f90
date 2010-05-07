@@ -37,21 +37,13 @@ subroutine flutterstriptheory(Nup, Tr, Lr, alpha, mu, M, Kmat, Vf)
       lp(:) = 0.D0
       do i = 1,Nk
        k = kmin + i*dk
-       !call EMatrixWing3DA(Nelem, Xnode, alpha, Nlen, Lr, Nwake, dcmplx(0.,k), E)
-       call theodorsenST(dcmplx(0.,k), Lr, E)
+       call EMatrixWing3DA(Nelem, Xnode, alpha, Lr, Nwake, dcmplx(0.,k), E)
+       !call theodorsenST(dcmplx(0.,k), Lr, E)
        A = - M - E/(mu*k**2)
        B = Kmat
        call ZGGEV('N', 'N', 2, A, 2, B, 2, l1, l2, VL, 1, VR, 1, WORK, 4, RWORK, INFO)
        l1 = l1/l2 !Set eigenvalue
-       do j = 1,2
-        if ((imagpart(lp(j))*imagpart(l1(j)) .lt. 0.D0) .and. (realpart(l1(j)) .lt. 0.D0)) then
-         !write(*,*) "Flutter"
-         Vf = dsqrt(1.D0/(k**2*realpart(-l1(j))))
-         !write(*,*) "U:", Vf, i
-         return
-        end if
-       end do
-       lp = l1
+       
 !       write(*,*) k
 !       do j = 1,2
 !        write(*,*) "L:", l1(j), ss(j,2)
@@ -59,6 +51,16 @@ subroutine flutterstriptheory(Nup, Tr, Lr, alpha, mu, M, Kmat, Vf)
 !        write(*,*) "U:", Vf
 !       end do
 !       write(*,*)
+       
+       do j = 1,2
+        if ((imagpart(lp(j))*imagpart(l1(j)) .lt. 0.D0) .and. (realpart(l1(j)) .lt. 0.D0)) then
+!         write(*,*) "Flutter"
+         Vf = dsqrt(1.D0/(k**2*realpart(-l1(j))))
+!         write(*,*) "U:", Vf, i
+         return
+        end if
+       end do
+       lp = l1
       end do
 
 end subroutine

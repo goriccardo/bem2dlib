@@ -122,7 +122,7 @@ subroutine EMatrixWing3DA(Nelem, Xnode, alpha, L, Nwake, p, E)
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
       real(kind=8), dimension(2), parameter :: xo = (/0.5D0,0.D0/)
       integer :: i
-      call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 5.D-1, p, EE)
+      call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 0.5D0, p, EE)
       call DeltaS(Nelem, Xnode, ds)
       call normals(Nelem, Xnode, n0)
       call collocation(Nelem, Xnode, Cpoint)
