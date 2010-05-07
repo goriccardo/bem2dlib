@@ -121,6 +121,7 @@ subroutine EMatrixWing3DA(Nelem, Xnode, alpha, L, Nwake, p, E)
       real(kind=8), dimension(Nelem) :: ds, b
       real(kind=8), dimension(Nelem,2) :: n0, Cpoint
       real(kind=8), dimension(2), parameter :: xo = (/0.5D0,0.D0/)
+      real(KIND=8), parameter :: PI = 4.D0*datan(1.D0)
       integer :: i
       call EMatrixWingPres(Nelem, Xnode, alpha, NWake, 0.5D0, p, EE)
       call DeltaS(Nelem, Xnode, ds)
@@ -132,9 +133,15 @@ subroutine EMatrixWing3DA(Nelem, Xnode, alpha, L, Nwake, p, E)
        EGF(2,i) = ds(i)*b(i)
       end do
       E = matmul(EGF,EE)
-      E(1,1) = E(1,1)*L/5.D0
-      E(1,2) = E(1,2)*L/4.D0
-      E(2,1) = E(2,1)*L/4.D0
-      E(2,2) = E(2,2)*L/3.D0
+!     Strip theory
+!      E(1,1) = E(1,1)*L/5.D0
+!      E(1,2) = E(1,2)*L/4.D0
+!      E(2,1) = E(2,1)*L/4.D0
+!      E(2,2) = E(2,2)*L/3.D0
+!     Strip theory with elliptical correction
+      E(1,1) = pi*E(1,1)*L/32.D0
+      E(1,2) = E(1,2)*L/7.5D0
+      E(2,1) = E(2,1)*L/7.5D0
+      E(2,2) = pi*E(2,2)*L/16.D0
 end subroutine
 
