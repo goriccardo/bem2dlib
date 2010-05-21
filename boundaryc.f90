@@ -42,7 +42,7 @@ subroutine BCondStraightLap(Nelem, Xnode, uscalar, alpha, Nfreq, s, Us, Chilap)
       integer, intent(IN) :: Nelem
       real(kind=8), dimension(Nelem,2), intent(IN) :: Xnode
       real(kind=8), intent(IN) :: Uscalar, alpha
-      real(kind=8) :: alpharad, wa, Freq
+      real(kind=8) :: alpharad
       real(kind=8), dimension(2) :: U
       integer, intent(IN) :: NFreq
       complex(kind=8), dimension(Nfreq), intent(OUT) :: s
@@ -62,7 +62,6 @@ subroutine BCondStraightLap(Nelem, Xnode, uscalar, alpha, Nfreq, s, Us, Chilap)
       alphaRad = alpha*PI/dble(180)
       call bodyrotation(uscalar, alpha, U)
       Us(1,:) = dcmplx(U)
-      wa = dble(2)*PI*freq    ![rad/s]
       do i = 1, Nelem
        ChiLap(i,1) = -Uscalar*(dcos(alpharad)*n(i,1)+dsin(alpharad)*n(i,2))
       end do

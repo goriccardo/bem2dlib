@@ -1,10 +1,10 @@
 LIBSRCS = pressure.f90 geom.f90 fieldgrid.f90 wake.f90 velocity.f90 geomwing.f90 integrals.f90 bem2d.f90 \
-          geomcircle.f90 boundaryc.f90 ematrices.f90 clnaca00xx.f90 vgmeth.f90 theo.f90
+          geomcircle.f90 boundaryc.f90 ematrices.f90 clnaca00xx.f90 vgmeth.f90 theo.f90 clnaca00xx.f90
 
 SRCS = $(LIBSRCS) circle2d.f90 wing2d.f90 wing2dlap.f90 etest.f90 naca00xx.f90
 
 OBJS = pressure.o geom.o fieldgrid.o wake.o velocity.o integrals.o bem2d.o boundaryc.o ematrices.o \
-       geomwing.o vgmeth.o theo.o
+       geomwing.o vgmeth.o theo.o clnaca00xx.o
 
 COBJS = $(OBJS) circle2d.o geomcircle.o
 WOBJS = $(OBJS) wing2d.o
